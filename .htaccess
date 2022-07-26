@@ -1,0 +1,8 @@
+Options -Indexes
+
+<Files ~ "\.(env|env_example|json|md|gitignore|gitattributes|lock|sql)$">
+    Order allow,deny
+    Deny from all
+</Files>
+
+RedirectMatch 404 ^(.*/)?\.git+
