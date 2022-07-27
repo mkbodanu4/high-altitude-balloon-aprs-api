@@ -63,9 +63,9 @@ switch ($get) {
             if ($filter_from_date && $filter_to_date)
                 $history_stmt->bind_param('ss', $call_signs_row->call_sign, $filter_from_date, $filter_to_date);
             elseif ($filter_from_date && !$filter_to_date)
-                $history_stmt->bind_param('s', $call_signs_row->call_sign, $filter_from_date);
+                $history_stmt->bind_param('ss', $call_signs_row->call_sign, $filter_from_date);
             elseif (!$filter_from_date && $filter_to_date)
-                $history_stmt->bind_param('s', $call_signs_row->call_sign, $filter_to_date);
+                $history_stmt->bind_param('ss', $call_signs_row->call_sign, $filter_to_date);
             else
                 $history_stmt->bind_param('s', $call_signs_row->call_sign);
             $history_stmt->execute();
