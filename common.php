@@ -33,3 +33,19 @@ try {
 } catch (Exception $e) {
     die('Database connection not established, please check application configuration');
 }
+
+include __DIR__ . DIRECTORY_SEPARATOR . "translations.php";
+
+function __($str, $language_code)
+{
+    global $lang;
+
+    return isset($lang[$language_code]) && isset($lang[$language_code][$str]) ? $lang[$language_code][$str] : $str;
+}
+
+
+function log_event($s = "")
+{
+    if (getenv("ENVIRONMENT") !== 'production')
+        echo "[" . date("Y-m-d H:i:s") . "] " . $s . "\n";
+}

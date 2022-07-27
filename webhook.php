@@ -1,0 +1,199 @@
+<?php
+
+include __DIR__ . DIRECTORY_SEPARATOR . "common.php";
+include __DIR__ . DIRECTORY_SEPARATOR . "telegram_api.class.php";
+
+if ($_SERVER['HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN'] !== getenv('TELEGRAM_SECRET_TOKEN')) {
+    http_response_code(401);
+    exit;
+}
+
+$input = file_get_contents('php://input');
+
+if (!$input) {
+    http_response_code(400);
+    exit;
+}
+
+$request = json_decode($input);
+
+if ($request === NULL) {
+    http_response_code(400);
+    exit;
+}
+
+if (!isset($request->message)) {
+    http_response_code(400);
+    exit;
+}
+
+$Telegram_API = new Telegram_API(getenv('TELEGRAM_API_KEY'));
+
+$input_message = $request->message;
+
+$user_id_stmt = $db->prepare("SELECT `user_id` FROM `users` WHERE `telegram_user_id` = ? LIMIT 1;");
+$user_id_stmt->bind_param('d', $input_message->from->id);
+$user_id_stmt->execute();
+$user_id_stmt->bind_result($user_id);
+$user_id_stmt->fetch();
+$user_id_stmt->close();
+
+if (!$user_id) {
+    $add_user_stmt = $db->prepare("INSERT INTO
+        `users`
+    SET
+        `active_chat_id` = ?,
+        `telegram_user_id` = ?,
+        `first_name` = ?,
+        `last_name` = ?,
+        `username` = ?,
+        `language_code` = ?,
+        `enabled` = FALSE,
+        `latitude` = NULL,
+        `longitude` = NULL,
+        `date_created` = UTC_TIMESTAMP(),
+        `date_updated` = UTC_TIMESTAMP()
+    ;");
+    $add_user_stmt->bind_param('iissss',
+        $input_message->chat->id,
+        $input_message->from->id,
+        $input_message->from->first_name,
+        $input_message->from->last_name,
+        $input_message->from->username,
+        $input_message->from->language_code
+    );
+    $add_user_stmt->execute();
+    $user_id = $add_user_stmt->insert_id;
+    $add_user_stmt->close();
+} else {
+    $update_user_stmt = $db->prepare("UPDATE
+        `users`
+    SET
+        `active_chat_id` = ?,
+        `telegram_user_id` = ?,
+        `first_name` = ?,
+        `last_name` = ?,
+        `username` = ?,
+        `language_code` = ?,
+        `date_updated` = UTC_TIMESTAMP()
+    WHERE
+        `user_id` = ?
+    LIMIT 1
+    ;");
+    $update_user_stmt->bind_param('iissssi',
+        $input_message->chat->id,
+        $input_message->from->id,
+        $input_message->from->first_name,
+        $input_message->from->last_name,
+        $input_message->from->username,
+        $input_message->from->language_code,
+        $user_id
+    );
+    $update_user_stmt->execute();
+    $update_user_stmt->close();
+}
+
+if (isset($input_message->location) && $input_message->location->latitude && $input_message->location->longitude) {
+    $update_user_stmt = $db->prepare("UPDATE
+        `users`
+    SET
+        `latitude` = ?,
+        `longitude` = ?,
+        `date_updated` = UTC_TIMESTAMP()
+    WHERE
+        `user_id` = ?
+    LIMIT 1
+    ;");
+    $update_user_stmt->bind_param('ddi',
+        $input_message->location->latitude,
+        $input_message->location->longitude,
+        $user_id
+    );
+    if ($update_user_stmt->execute()) {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Thanks for providing the location, I successfully saved your coordinates. Please /enable or /disable notifications.", $input_message->from->language_code));
+    } else {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $input_message->from->language_code));
+    }
+    $update_user_stmt->close();
+} elseif ($input_message->text === '/enable') {
+    $update_user_stmt = $db->prepare("UPDATE
+        `users`
+    SET
+        `enabled` = TRUE,
+        `date_updated` = UTC_TIMESTAMP()
+    WHERE
+        `user_id` = ?
+    LIMIT 1
+    ;");
+    $update_user_stmt->bind_param('i',
+        $user_id
+    );
+    if ($update_user_stmt->execute()) {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Notifications enabled. I will drop you a message after detecting the balloon nearby. Feel free to disable notifications with command /disable.", $input_message->from->language_code));
+    } else {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $input_message->from->language_code));
+    }
+    $update_user_stmt->close();
+} elseif ($input_message->text === '/disable') {
+    $update_user_stmt = $db->prepare("UPDATE
+        `users`
+    SET
+        `enabled` = FALSE,
+        `date_updated` = UTC_TIMESTAMP()
+    WHERE
+        `user_id` = ?
+    LIMIT 1
+    ;");
+    $update_user_stmt->bind_param('i',
+        $user_id
+    );
+    if ($update_user_stmt->execute()) {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Notifications were disabled. Use the command /enable to bring them back.", $input_message->from->language_code));
+    } else {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $input_message->from->language_code));
+    }
+    $update_user_stmt->close();
+} elseif ($input_message->text === '/status') {
+    $user_stmt = $db->prepare("SELECT `enabled`, `latitude`, `longitude` FROM `users` WHERE `user_id` = ? LIMIT 1;");
+    $user_stmt->bind_param('i', $user_id);
+    if ($user_stmt->execute()) {
+        $user_stmt->bind_result($user_enabled, $user_latitude, $user_longitude);
+        $user_stmt->fetch();
+
+        $status = __("Status", $input_message->from->language_code) . ": " .
+            ($user_enabled ? __("Enabled", $input_message->from->language_code) : __("Disabled", $input_message->from->language_code)) . "\n" .
+            ($user_latitude && $user_longitude ?
+                __("Location", $input_message->from->language_code) . ": " : __("No location saved yet", $input_message->from->language_code));
+        $Telegram_API->sendMessage($input_message->chat->id, $status);
+        if ($user_latitude && $user_longitude) {
+            $Telegram_API->sendLocation($input_message->chat->id, $user_latitude, $user_longitude);
+        }
+    } else {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $input_message->from->language_code));
+    }
+    $user_stmt->close();
+} elseif ($input_message->text === '/leave_me_alone') {
+    $update_user_stmt = $db->prepare("DELETE FROM
+        `users`
+    WHERE
+        `user_id` = ?
+    LIMIT 1
+    ;");
+    $update_user_stmt->bind_param('i',
+        $user_id
+    );
+    if ($update_user_stmt->execute()) {
+        $Telegram_API->sendMessage($input_message->chat->id, __("All your data removed from my database. You need /start again to continue our cooperation.", $input_message->from->language_code));
+    } else {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $input_message->from->language_code));
+    }
+    $update_user_stmt->close();
+} elseif ($input_message->text === '/start') {
+    $Telegram_API->sendMessage($input_message->chat->id, __("Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby. Please send any location (it could be done with your smartphone only), so I could know the place you are interested in. Strongly recommend send not your exact location, but something near you (keep your private data safe).", $input_message->from->language_code));
+} else {
+    $Telegram_API->sendMessage($input_message->chat->id, __("I don't know what to respond, try /start command.", $input_message->from->language_code));
+}
+
+http_response_code(200);
+header("Content-type:text/plain");
+exit;
