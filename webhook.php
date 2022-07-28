@@ -38,6 +38,13 @@ $user_id_stmt->bind_result($user_id);
 $user_id_stmt->fetch();
 $user_id_stmt->close();
 
+$active_chat_id = $input_message->chat->id;
+$telegram_user_id = $input_message->from->id;
+$first_name = isset($input_message->from->first_name) ? $input_message->from->first_name : NULL;
+$last_name = isset($input_message->from->last_name) ? $input_message->from->last_name : NULL;
+$username = isset($input_message->from->username) ? $input_message->from->username : NULL;
+$language_code = isset($input_message->from->language_code) ? $input_message->from->language_code : NULL;
+
 if (!$user_id) {
     $add_user_stmt = $db->prepare("INSERT INTO
         `users`
@@ -55,12 +62,12 @@ if (!$user_id) {
         `date_updated` = UTC_TIMESTAMP()
     ;");
     $add_user_stmt->bind_param('iissss',
-        $input_message->chat->id,
-        $input_message->from->id,
-        $input_message->from->first_name,
-        $input_message->from->last_name,
-        $input_message->from->username,
-        $input_message->from->language_code
+        $active_chat_id,
+        $telegram_user_id,
+        $first_name,
+        $last_name,
+        $username,
+        $language_code
     );
     $add_user_stmt->execute();
     $user_id = $add_user_stmt->insert_id;
@@ -81,12 +88,12 @@ if (!$user_id) {
     LIMIT 1
     ;");
     $update_user_stmt->bind_param('iissssi',
-        $input_message->chat->id,
-        $input_message->from->id,
-        $input_message->from->first_name,
-        $input_message->from->last_name,
-        $input_message->from->username,
-        $input_message->from->language_code,
+        $active_chat_id,
+        $telegram_user_id,
+        $first_name,
+        $last_name,
+        $username,
+        $language_code,
         $user_id
     );
     $update_user_stmt->execute();
