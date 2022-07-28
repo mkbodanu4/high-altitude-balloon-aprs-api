@@ -237,7 +237,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
     }
     $update_user_stmt->close();
 } elseif ($input_message->text === '/start') {
-    $Telegram_API->sendMessage($input_message->chat->id, __("Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby.\n\nPlease send any location as attachment (it could be done with your smartphone only), so I could know the place you are interested in.\nInstruction (with screenshots) available here: https://diy.manko.pro/high-altitude-balloon/#bot\n\nAlso you can send QTH locator (like KN29at) and I will try to decode coordinates from it.\n\nLooking forward for your location attachment or QTH locator.", $input_message->from->language_code));
+    $Telegram_API->sendMessage($input_message->chat->id, __("Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby.\n\nPlease send any location as attachment (it could be done with your smartphone only), so I could know the place you are interested in.\nInstruction (with screenshots) available here: https://diy.manko.pro/en/high-altitude-balloon-en/#bot\n\nAlso you can send QTH locator (like KN29at) and I will try to decode coordinates from it.\n\nLooking forward for your location attachment or QTH locator.", $input_message->from->language_code));
 } else {
     $Telegram_API->sendMessage($input_message->chat->id, __("I don't know what to respond, try /start command.", $input_message->from->language_code));
 }
