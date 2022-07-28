@@ -106,6 +106,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
     SET
         `latitude` = ?,
         `longitude` = ?,
+        `enabled` = TRUE,
         `date_updated` = UTC_TIMESTAMP()
     WHERE
         `user_id` = ?
@@ -153,6 +154,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
     SET
         `latitude` = ?,
         `longitude` = ?,
+        `enabled` = TRUE,
         `date_updated` = UTC_TIMESTAMP()
     WHERE
         `user_id` = ?
