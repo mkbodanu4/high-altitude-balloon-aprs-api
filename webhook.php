@@ -171,24 +171,38 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
     }
     $update_user_stmt->close();
 } elseif ($input_message->text === '/enable') {
-    $update_user_stmt = $db->prepare("UPDATE
-        `users`
-    SET
-        `enabled` = TRUE,
-        `date_updated` = UTC_TIMESTAMP()
-    WHERE
-        `user_id` = ?
-    LIMIT 1
-    ;");
-    $update_user_stmt->bind_param('i',
-        $user_id
-    );
-    if ($update_user_stmt->execute()) {
-        $Telegram_API->sendMessage($input_message->chat->id, __("Notifications enabled. I will drop you a message after detecting the balloon nearby. Feel free to disable notifications with command /disable.", $input_message->from->language_code));
-    } else {
-        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $input_message->from->language_code));
+    $user_latitude = NULL;
+    $user_longitude = NULL;
+    $user_stmt = $db->prepare("SELECT `latitude`, `longitude` FROM `users` WHERE `user_id` = ? LIMIT 1;");
+    $user_stmt->bind_param('i', $user_id);
+    if ($user_stmt->execute()) {
+        $user_stmt->bind_result($user_latitude, $user_longitude);
+        $user_stmt->fetch();
     }
-    $update_user_stmt->close();
+    $user_stmt->close();
+
+    if ($user_latitude && $user_longitude) {
+        $update_user_stmt = $db->prepare("UPDATE
+                `users`
+            SET
+                `enabled` = TRUE,
+                `date_updated` = UTC_TIMESTAMP()
+            WHERE
+                `user_id` = ?
+            LIMIT 1
+            ;");
+        $update_user_stmt->bind_param('i',
+            $user_id
+        );
+        if ($update_user_stmt->execute()) {
+            $Telegram_API->sendMessage($input_message->chat->id, __("Notifications enabled. I will drop you a message after detecting the balloon nearby. Feel free to disable notifications with command /disable.", $input_message->from->language_code));
+        } else {
+            $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $input_message->from->language_code));
+        }
+        $update_user_stmt->close();
+    } else {
+        $Telegram_API->sendMessage($input_message->chat->id, __("I see you have no location saved, please send one (or QTH locator) before enabling notifications.", $input_message->from->language_code));
+    }
 } elseif ($input_message->text === '/disable') {
     $update_user_stmt = $db->prepare("UPDATE
         `users`
