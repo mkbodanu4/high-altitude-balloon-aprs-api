@@ -115,6 +115,54 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $input_message->from->language_code));
     }
     $update_user_stmt->close();
+} elseif (preg_match("/^\s{0,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message->text)) {
+    $qth = strtoupper(trim($input_message->text));
+
+    $chars_mapping = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // Constants.
+    $int_mapping = "0123456789";
+
+    $latitude = strpos($chars_mapping, substr($qth, 1, 1)) * 10; // 2nd digit: 10deg latitude slot.
+    $longitude = strpos($chars_mapping, substr($qth, 0, 1)) * 20; // 1st digit: 20deg longitude slot.
+    $latitude += strpos($int_mapping, substr($qth, 3, 1)) * 1; // 4th digit: 1deg latitude slot.
+    $longitude += strpos($int_mapping, substr($qth, 2, 1)) * 2; // 3rd digit: 2deg longitude slot.
+    if (strlen($qth) == 6) {
+        $latitude += strpos($chars_mapping, substr($qth, 5, 1)) * 2.5 / 60; // 6th digit: 2.5min latitude slot.
+        $longitude += strpos($chars_mapping, substr($qth, 4, 1)) * 5 / 60; // 5th digit: 5min longitude slot.
+    }
+
+    if (strlen($qth) == 4) { // Get coordinates of the center of the square.
+        $latitude += 0.5 * 1;
+        $longitude += 0.5 * 2;
+    } else {
+        $latitude += 0.5 * 2.5 / 60;
+        $longitude += 0.5 * 5 / 60;
+    }
+
+    $latitude -= 90; // Locator lat/lon origin shift.
+    $longitude -= 180;
+
+    $update_user_stmt = $db->prepare("UPDATE
+        `users`
+    SET
+        `latitude` = ?,
+        `longitude` = ?,
+        `date_updated` = UTC_TIMESTAMP()
+    WHERE
+        `user_id` = ?
+    LIMIT 1
+    ;");
+    $update_user_stmt->bind_param('ddi',
+        $latitude,
+        $longitude,
+        $user_id
+    );
+    if ($update_user_stmt->execute()) {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Thanks for providing QTH location, I successfully decoded and saved your coordinates. Check that coordination in location I just sent. Also please /enable or /disable notifications.", $input_message->from->language_code));
+        $Telegram_API->sendLocation($input_message->chat->id, $latitude, $longitude);
+    } else {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $input_message->from->language_code));
+    }
+    $update_user_stmt->close();
 } elseif ($input_message->text === '/enable') {
     $update_user_stmt = $db->prepare("UPDATE
         `users`
@@ -189,7 +237,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
     }
     $update_user_stmt->close();
 } elseif ($input_message->text === '/start') {
-    $Telegram_API->sendMessage($input_message->chat->id, __("Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby. Please send any location (it could be done with your smartphone only), so I could know the place you are interested in. Strongly recommend send not your exact location, but something near you (keep your private data safe).", $input_message->from->language_code));
+    $Telegram_API->sendMessage($input_message->chat->id, __("Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby.\n\nPlease send any location as attachment (it could be done with your smartphone only), so I could know the place you are interested in.\nInstruction (with screenshots) available here: https://diy.manko.pro/high-altitude-balloon/\n\nAlso you can send QTH locator (like KN29at) and I will try to decode coordinates from it.\n\nLooking forward for your location attachment or QTH locator.", $input_message->from->language_code));
 } else {
     $Telegram_API->sendMessage($input_message->chat->id, __("I don't know what to respond, try /start command.", $input_message->from->language_code));
 }
