@@ -166,7 +166,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $user_id
     );
     if ($update_user_stmt->execute()) {
-        $Telegram_API->sendMessage($input_message->chat->id, __("Thanks for providing QTH location, I successfully decoded and saved your coordinates. Check that coordination in location I just sent. Also please /enable or /disable notifications.", $language_code));
+        $Telegram_API->sendMessage($input_message->chat->id, __("Thanks for providing QTH location, I successfully decoded and saved your coordinates. Check that coordinates in location I just sent. Also please /enable or /disable notifications.", $language_code));
         $Telegram_API->sendLocation($input_message->chat->id, $latitude, $longitude);
     } else {
         $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));

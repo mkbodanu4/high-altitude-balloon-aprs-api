@@ -95,7 +95,7 @@ if (count($balloons) > 0) {
 
                     if (!$is_sent) {
                         log_event("User " . $user->username . " NOT received notification about " . $balloon->call_sign . " balloon within " . ($range['min'] ? $range['min'] . "-" : "") . $range['max'] . " km range - " . $user->distance);
-                        $telegram_message = __("New balloon nearby!", $user->language_code) . "\n" .
+                        $telegram_message = __("There is a balloon nearby!", $user->language_code) . "\n" .
                             __("Call sign", $user->language_code) . ": " . $balloon->call_sign . "\n" .
                             __("Distance to you", $user->language_code) . ": " . round(floatval($user->distance), 2) . " " . __("km", $user->language_code) . "\n" .
                             (!is_null($balloon->altitude) ? __("Altitude", $user->language_code) . ": " . round(floatval($balloon->altitude), 2) . " " . __("m", $user->language_code) . "\n" : "") .

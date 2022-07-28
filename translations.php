@@ -4,7 +4,7 @@ $lang['uk'] = array(
     "Thanks for providing the location, I successfully saved your coordinates. Please /enable or /disable notifications." =>
         "Дякую за надану локацію, я успішно зберіг ці координати. Будь ласка, увімкніть /enable або вимкніть /disable сповіщення.",
 
-    "Thanks for providing QTH location, I successfully decoded and saved your coordinates. Check that coordination in location I just sent. Also please /enable or /disable notifications." =>
+    "Thanks for providing QTH location, I successfully decoded and saved your coordinates. Check that coordinates in location I just sent. Also please /enable or /disable notifications." =>
         "Дякую за наданий QTH локатор, я успішно декодував і зберіг ваші координати. Але перевірте їх, я от щойно відправив вам локацію. Також не забудьте увімкнути /enable або вимкнути /disable сповіщення.",
 
     "Something went wrong. I will do my best to fix this problem ASAP." =>
@@ -40,8 +40,8 @@ $lang['uk'] = array(
     "No location saved yet" =>
         "Жодну локацію ще не збережено",
 
-    "New balloon nearby!" =>
-        "Нова куля поблизу!",
+    "There is a balloon nearby!" =>
+        "Бачу кулю поблизу!",
 
     "Call sign" =>
         "Кличний",
@@ -83,8 +83,8 @@ $lang['pl'] = array(
     "Thanks for providing the location, I successfully saved your coordinates. Please /enable or /disable notifications." =>
         "Dziękuję za podanie lokalizacji, udało mi się zapisać. Proszę włącz /enable lub wyłącz /disable powiadomienia.",
 
-    "Thanks for providing QTH location, I successfully decoded and saved your coordinates. Check that coordination in location I just sent. Also please /enable or /disable notifications." =>
-        "Dzięki za podanie lokalizacji QTH, pomyślnie odkodowałem i zapisałem twoje współrzędne. Sprawdź koordynację w lokalizacji, którą właśnie wysłałem. Proszę włącz /enable lub wyłącz /disable powiadomienia.",
+    "Thanks for providing QTH location, I successfully decoded and saved your coordinates. Check that coordinates in location I just sent. Also please /enable or /disable notifications." =>
+        "Dzięki za podanie lokalizacji QTH, pomyślnie odkodowałem i zapisałem twoje współrzędne. Sprawdź współrzędne w lokalizacji, którą właśnie wysłałem.. Proszę włącz /enable lub wyłącz /disable powiadomienia.",
 
     "Something went wrong. I will do my best to fix this problem ASAP." =>
         "Coś poszło nie tak. Zrobię co w mojej mocy, aby rozwiązać ten problem JAK NAJSZYBCIEJ.",
@@ -92,8 +92,8 @@ $lang['pl'] = array(
     "Notifications enabled. I will drop you a message after detecting the balloon nearby. Feel free to disable notifications with command /disable." =>
         "Powiadomienia włączone. Wyślę ci wiadomość po wykryciu pobliskiego balonu. Możesz wyłączyć powiadomienia za pomocą polecenia /disable.",
 
-    "Powiadomienia zostały wyłączone. Użyj polecenia /enable, aby je przywrócić." =>
-        "Сповіщення вимкнені. Використайте команду /enable щоб увімкнути їх назад.",
+    "Notifications were disabled. Use the command /enable to bring them back." =>
+        "Powiadomienia zostały wyłączone. Użyj polecenia /enable, aby je przywrócić.",
 
     "Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby.\n\nPlease send any location as attachment (it could be done with your smartphone only), so I could know the place you are interested in.\nInstruction (with screenshots) available here: https://diy.manko.pro/en/high-altitude-balloon-en/#bot\n\nAlso you can send QTH locator (like KN29at) and I will try to decode coordinates from it.\n\nLooking forward for your location attachment or QTH locator." =>
         "Cześć! Monitoruję balony radioamatorskie i mogę Cię powiadomić, gdy jeden z nich będzie przelatywał w pobliżu.\n\nPrześlij jako załącznik dowolną lokalizację (można to zrobić tylko za pomocą smartfona), abym mógł poznać miejsce, które Cię interesuje.\nInstrukcja (ze zrzutami ekranu) dostępny tutaj: https://diy.manko.pro/en/high-altitude-balloon-en/#bot\n\nMożesz również wysłać lokalizator QTH (np. KN29at), a ja spróbuję zdekodować współrzędne z to.\n\nOczekuję załącznika lokalizacji lub lokalizatora QTH.",
@@ -119,8 +119,8 @@ $lang['pl'] = array(
     "No location saved yet" =>
         "Nie zapisano jeszcze lokalizacji",
 
-    "New balloon nearby!" =>
-        "Nowy balon w pobliżu!",
+    "There is a balloon nearby!" =>
+        "W pobliżu jest balon!",
 
     "Call sign" =>
         "Znak wywoławczy",
