@@ -103,6 +103,7 @@ if (count($balloons) > 0) {
                             (!is_null($balloon->course) ? __("Course", $user->language_code) . ": " . intval($balloon->course) . " " . __("°", $user->language_code) . "\n" : "") .
                             __("Comment", $user->language_code) . ": " . htmlspecialchars($balloon->comment) . "\n" . "\n" .
                             "https://aprs.fi/?call=" . $balloon->call_sign;
+                        $Telegram_API->sendLocation($user->active_chat_id, $balloon->latitude, $balloon->longitude);
                         $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message);
                         if ($sent->ok && $sent->result) {
                             log_event("Message to user " . $user->username . " successfully sent");
