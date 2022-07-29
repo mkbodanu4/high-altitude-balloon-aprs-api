@@ -31,8 +31,20 @@ $balloons_query = "SELECT
     `h2`.`daodatumbyte`,
     `h2`.`comment`,
     `h2`.`raw`
-FROM (SELECT `h`.`call_sign`, MAX(`h`.`date`) AS `max_date` FROM `history` `h` WHERE `h`.`date` >= UTC_TIMESTAMP() - INTERVAL 5 MINUTE GROUP BY `h`.`call_sign`) `max_h`
-LEFT JOIN `history` `h2` ON `max_h`.`max_date` = `h2`.`date` AND `max_h`.`call_sign` = `h2`.`call_sign`;";
+FROM (
+        SELECT
+            `h`.`call_sign`,
+            MAX(`h`.`date`) AS `max_date`
+        FROM
+            `history` `h` 
+        WHERE
+            `h`.`altitude` >= 500 AND
+            `h`.`date` >= UTC_TIMESTAMP() - INTERVAL 5 MINUTE
+        GROUP BY
+            `h`.`call_sign`
+    ) `max_h`
+LEFT JOIN
+    `history` `h2` ON `max_h`.`max_date` = `h2`.`date` AND `max_h`.`call_sign` = `h2`.`call_sign`;";
 $balloons_stmt = $db->prepare($balloons_query);
 $balloons_stmt->execute();
 $balloons_result = $balloons_stmt->get_result();
