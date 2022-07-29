@@ -61,7 +61,7 @@ switch ($get) {
             ORDER BY `date` ASC;";
             $history_stmt = $db->prepare($history_query);
             if ($filter_from_date && $filter_to_date)
-                $history_stmt->bind_param('ss', $call_signs_row->call_sign, $filter_from_date, $filter_to_date);
+                $history_stmt->bind_param('sss', $call_signs_row->call_sign, $filter_from_date, $filter_to_date);
             elseif ($filter_from_date && !$filter_to_date)
                 $history_stmt->bind_param('ss', $call_signs_row->call_sign, $filter_from_date);
             elseif (!$filter_from_date && $filter_to_date)
