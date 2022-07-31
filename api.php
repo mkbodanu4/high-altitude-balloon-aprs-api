@@ -38,7 +38,7 @@ switch ($get) {
         if ($filter_from_date) {
             $filter_date_diff = ($filter_to_date ? strtotime($filter_to_date) : time()) - strtotime($filter_from_date);
             if ($filter_date_diff > 172800) {
-                $filter_precision = 1; // Fewer points if timespan bigger than 2 days
+                $filter_precision = 0; // Fewer points if timespan bigger than 2 days
             }
         }
         $balloons = array();
