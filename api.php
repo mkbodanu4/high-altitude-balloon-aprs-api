@@ -7,8 +7,6 @@ if (!isset($_GET['key']) || $_GET['key'] !== getenv('API_KEY')) {
     exit;
 }
 
-$filtering_precision = 2;
-
 $get = isset($_GET['get']) ? trim(filter_var($_GET['get'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : NULL;
 switch ($get) {
     case 'history':
@@ -35,6 +33,14 @@ switch ($get) {
 
         $filter_call_sign = isset($_GET['call_sign']) ? trim(filter_var($_GET['call_sign'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : NULL;
 
+        $filter_date_diff = NULL;
+        $filter_precision = 2;
+        if ($filter_from_date) {
+            $filter_date_diff = ($filter_to_date ? strtotime($filter_to_date) : time()) - strtotime($filter_from_date);
+            if ($filter_date_diff > 172800) {
+                $filter_precision = 1; // Fewer points if timespan bigger than 2 days
+            }
+        }
         $balloons = array();
 
         $call_signs_where = array();
@@ -114,7 +120,8 @@ switch ($get) {
             FROM
                 `history`
             " . (count($history_where) > 0 ? "WHERE " . implode(" AND ", $history_where) . " " : "") . "
-            ORDER BY `date` ASC;";
+            " . ($filter_date_diff !== NULL && $filter_date_diff > 432000 ? "ORDER BY `date` DESC LIMIT 1" : "ORDER BY `date` ASC") . "
+            ;"; // Only last point if timespan more than 5 days
             $history_stmt = $db->prepare($history_query);
             if (count($history_params) > 0) {
                 $history_stmt->bind_param(str_repeat('s', count($history_params)), ...$history_params);
@@ -124,7 +131,7 @@ switch ($get) {
             $previous_latitude = NULL;
             $previous_longitude = NULL;
             while ($row = $history_result->fetch_object()) {
-                if ($previous_latitude !== NULL && $previous_longitude !== NULL && round($previous_latitude, $filtering_precision) == round($row->latitude, $filtering_precision) && round($previous_longitude, $filtering_precision) == round($row->longitude, $filtering_precision)) {
+                if ($previous_latitude !== NULL && $previous_longitude !== NULL && round($previous_latitude, $filter_precision) == round($row->latitude, $filter_precision) && round($previous_longitude, $filter_precision) == round($row->longitude, $filter_precision)) {
                     // Discard previous element of array, if it has same location as current
                     array_pop($balloon_history);
                 }
