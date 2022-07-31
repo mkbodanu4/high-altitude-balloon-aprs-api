@@ -7,6 +7,8 @@ if (!isset($_GET['key']) || $_GET['key'] !== getenv('API_KEY')) {
     exit;
 }
 
+$filtering_precision = 2;
+
 $get = isset($_GET['get']) ? trim(filter_var($_GET['get'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : NULL;
 switch ($get) {
     case 'history':
@@ -92,6 +94,7 @@ switch ($get) {
                 $history_where[] = "`date` <= ?";
                 $history_params[] = $filter_to_date;
             }
+            /*
             if ($filter_south_west_lat !== NULL && $filter_south_west_lng !== NULL && $filter_north_east_lat !== NULL && $filter_north_east_lng !== NULL) {
                 $history_where[] = "( `longitude` >= ? AND `longitude` <= ? AND `latitude` >= ? AND `latitude` <= ? )";
                 $history_params[] = $filter_south_west_lng;
@@ -99,6 +102,7 @@ switch ($get) {
                 $history_params[] = $filter_south_west_lat;
                 $history_params[] = $filter_north_east_lat;
             }
+            */
             $history_query = "SELECT
                 `date`,
                 `latitude`,
@@ -120,7 +124,7 @@ switch ($get) {
             $previous_latitude = NULL;
             $previous_longitude = NULL;
             while ($row = $history_result->fetch_object()) {
-                if ($previous_latitude !== NULL && $previous_longitude !== NULL && $previous_latitude === $row->latitude && $previous_longitude === $row->longitude) {
+                if ($previous_latitude !== NULL && $previous_longitude !== NULL && round($previous_latitude, $filtering_precision) == round($row->latitude, $filtering_precision) && round($previous_longitude, $filtering_precision) == round($row->longitude, $filtering_precision)) {
                     // Discard previous element of array, if it has same location as current
                     array_pop($balloon_history);
                 }
@@ -129,7 +133,7 @@ switch ($get) {
                     "lat" => $row->latitude,
                     "lng" => $row->longitude,
                 );
-                if ($row->course) $packet['crs'] = $row->course;
+                //if ($row->course) $packet['crs'] = $row->course;
                 if ($row->speed) $packet['s'] = $row->speed;
                 if ($row->altitude) $packet['a'] = $row->altitude;
                 if ($row->comment) $packet['c'] = $row->comment;
@@ -140,7 +144,6 @@ switch ($get) {
                 $previous_longitude = $row->longitude;
             }
             $history_result->close();
-
 
             $balloons[$call_signs_row->call_sign] = $balloon_history;
         }
