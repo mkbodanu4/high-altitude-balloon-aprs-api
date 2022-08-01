@@ -140,7 +140,7 @@ switch ($get) {
             FROM
                 `history`
             " . (count($history_where) > 0 ? "WHERE " . implode(" AND ", $history_where) . " " : "") . "
-            " . ($filter_date_diff !== NULL && $filter_call_sign === NULL && $filter_date_diff > 864000 ? "ORDER BY `date` DESC LIMIT 1" : "ORDER BY `date` ASC") . "
+            " . ($filter_call_sign === NULL && (($filter_from_date === NULL && $filter_to_date === NULL) || ($filter_date_diff !== NULL && $filter_date_diff > 864000)) ? "ORDER BY `date` DESC LIMIT 1" : "ORDER BY `date` ASC") . "
             ;"; // Only last point if timespan more than 10 days
             $history_stmt = $db->prepare($history_query);
             if (count($history_params) > 0) {
