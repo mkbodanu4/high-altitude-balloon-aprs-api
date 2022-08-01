@@ -37,8 +37,6 @@ switch ($get) {
         $filter_north_east_lat = isset($_GET['north_east_lat']) ? trim(filter_var($_GET['north_east_lat'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION)) : NULL;
         $filter_north_east_lng = isset($_GET['north_east_lng']) ? trim(filter_var($_GET['north_east_lng'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION)) : NULL;
 
-        $filter_call_sign = isset($_GET['call_sign']) ? trim(filter_var($_GET['call_sign'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : NULL;
-
         $filter_date_diff = NULL;
         $filter_precision = 2;
         if ($filter_from_date) {
@@ -49,6 +47,8 @@ switch ($get) {
                 $filter_precision = 0; // Even less points if timespan bigger than 5 days
             }
         }
+
+        $filter_call_sign = isset($_GET['call_sign']) ? trim(filter_var($_GET['call_sign'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : NULL;
 
         if (getenv("BENCHMARK") === "TRUE") {
             $benchmarks['filters'] = round(microtime(TRUE) - $benchmark_point, 5);
@@ -140,7 +140,7 @@ switch ($get) {
             FROM
                 `history`
             " . (count($history_where) > 0 ? "WHERE " . implode(" AND ", $history_where) . " " : "") . "
-            " . ($filter_date_diff !== NULL && $filter_date_diff > 864000 ? "ORDER BY `date` DESC LIMIT 1" : "ORDER BY `date` ASC") . "
+            " . ($filter_date_diff !== NULL && $filter_call_sign === NULL && $filter_date_diff > 864000 ? "ORDER BY `date` DESC LIMIT 1" : "ORDER BY `date` ASC") . "
             ;"; // Only last point if timespan more than 10 days
             $history_stmt = $db->prepare($history_query);
             if (count($history_params) > 0) {
@@ -152,14 +152,14 @@ switch ($get) {
             $previous_latitude = NULL;
             $previous_longitude = NULL;
             while ($row = $history_result->fetch_object()) {
-                if ($previous_latitude !== NULL && $previous_longitude !== NULL && round($previous_latitude, $filter_precision) == round($row->latitude, $filter_precision) && round($previous_longitude, $filter_precision) == round($row->longitude, $filter_precision)) {
+                if ($filter_call_sign === NULL && $previous_latitude !== NULL && $previous_longitude !== NULL && round($previous_latitude, $filter_precision) == round($row->latitude, $filter_precision) && round($previous_longitude, $filter_precision) == round($row->longitude, $filter_precision)) {
                     // Discard previous element of array, if it has same location as current
                     array_pop($balloon_history);
                 }
 
                 $timestamp = strtotime($row->date);
 
-                if ($previous_timestamp !== NULL && ($timestamp - $previous_timestamp) < 30 && round($previous_latitude, 0) != round($row->latitude, 0) && round($previous_longitude, 0) != round($row->longitude, 0)) {
+                if ($previous_timestamp !== NULL && $filter_call_sign === NULL && ($timestamp - $previous_timestamp) < 30 && round($previous_latitude, 0) != round($row->latitude, 0) && round($previous_longitude, 0) != round($row->longitude, 0)) {
                     $previous_timestamp = $timestamp;
                     $previous_latitude = $row->latitude;
                     $previous_longitude = $row->longitude;
