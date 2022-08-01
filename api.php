@@ -40,11 +40,11 @@ switch ($get) {
         $filter_call_sign = isset($_GET['call_sign']) ? trim(filter_var($_GET['call_sign'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : NULL;
 
         $filter_date_diff = NULL;
-        $filter_precision = 2;
+        $filter_precision = 3;
         if ($filter_from_date) {
             $filter_date_diff = ($filter_to_date ? strtotime($filter_to_date) : time()) - strtotime($filter_from_date);
             if ($filter_date_diff > 172800) {
-                $filter_precision = 0; // Fewer points if timespan bigger than 2 days
+                $filter_precision = 2; // Fewer points if timespan bigger than 2 days
             }
         }
 
