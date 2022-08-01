@@ -148,6 +148,7 @@ switch ($get) {
             }
             $history_stmt->execute();
             $history_result = $history_stmt->get_result();
+            $previous_timestamp = NULL;
             $previous_latitude = NULL;
             $previous_longitude = NULL;
             while ($row = $history_result->fetch_object()) {
@@ -155,8 +156,15 @@ switch ($get) {
                     // Discard previous element of array, if it has same location as current
                     array_pop($balloon_history);
                 }
+
+                $timestamp = strtotime($row->date);
+
+                if ($previous_timestamp !== NULL && ($timestamp - $previous_timestamp) < 30 && round($previous_latitude, 0) != round($row->latitude, 0) && round($previous_longitude, 0) != round($row->longitude, 0)) {
+                    continue;
+                }
+
                 $packet = array(
-                    "d" => $row->date,
+                    "t" => $timestamp,
                     "lat" => $row->latitude,
                     "lng" => $row->longitude,
                 );
@@ -166,6 +174,7 @@ switch ($get) {
 
                 $balloon_history[] = $packet;
 
+                $previous_timestamp = $timestamp;
                 $previous_latitude = $row->latitude;
                 $previous_longitude = $row->longitude;
             }
