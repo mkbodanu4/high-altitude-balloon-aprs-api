@@ -1,7 +1,7 @@
 <?php
 
 $benchmarks = array();
-$benchmark_start = microtime();
+$benchmark_start = microtime(true);
 
 include __DIR__ . DIRECTORY_SEPARATOR . "common.php";
 
@@ -10,7 +10,7 @@ if (!isset($_GET['key']) || $_GET['key'] !== getenv('API_KEY')) {
     exit;
 }
 
-$benchmarks['boot'] = microtime() - $benchmark_start;
+$benchmarks['boot'] = round(microtime(true) - $benchmark_start, 5);
 
 $get = isset($_GET['get']) ? trim(filter_var($_GET['get'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : NULL;
 switch ($get) {
@@ -47,7 +47,7 @@ switch ($get) {
             }
         }
 
-        $benchmarks['filters'] = microtime() - $benchmark_start;
+        $benchmarks['filters'] = round(microtime(true) - $benchmark_start, 5);
 
         $balloons = array();
         $call_signs_where = array();
@@ -88,7 +88,7 @@ switch ($get) {
         $call_signs_stmt->execute();
         $call_signs_result = $call_signs_stmt->get_result();
 
-        $benchmarks['call_signs_query'] = microtime() - $benchmark_start;
+        $benchmarks['call_signs_query'] = round(microtime(true) - $benchmark_start, 5);
 
         while ($call_signs_row = $call_signs_result->fetch_object()) {
             $balloon_history = array();
@@ -166,7 +166,7 @@ switch ($get) {
         }
         $call_signs_result->close();
 
-        $benchmarks['history_queries'] = microtime() - $benchmark_start;
+        $benchmarks['history_queries'] = round(microtime(true) - $benchmark_start, 5);
 
         $http_response_code = 200;
         $response = array(
@@ -178,7 +178,7 @@ switch ($get) {
         $response = array();
 }
 
-$benchmarks['end'] = microtime() - $benchmark_start;
+$benchmarks['end'] = round(microtime(true) - $benchmark_start, 5);
 $response = array_merge($response, array(
     'benchmarks' => $benchmarks
 ));
