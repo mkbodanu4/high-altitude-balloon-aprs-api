@@ -1,21 +1,16 @@
 <?php
 
+include __DIR__ . DIRECTORY_SEPARATOR . "common.php";
+
 if (getenv("BENCHMARK") === "TRUE") {
-    $benchmarks = array();
     $benchmark_start = microtime(TRUE);
     $benchmark_point = microtime(TRUE);
+    $benchmarks = array();
 }
-
-include __DIR__ . DIRECTORY_SEPARATOR . "common.php";
 
 if (!isset($_GET['key']) || $_GET['key'] !== getenv('API_KEY')) {
     http_response_code(403);
     exit;
-}
-
-if (getenv("BENCHMARK") === "TRUE") {
-    $benchmarks['boot'] = round(microtime(TRUE) - $benchmark_point, 5);
-    $benchmark_point = microtime(TRUE);
 }
 
 $get = isset($_GET['get']) ? trim(filter_var($_GET['get'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : NULL;
