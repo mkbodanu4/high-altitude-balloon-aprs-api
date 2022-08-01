@@ -1,7 +1,9 @@
 <?php
 
-$benchmarks = array();
-$benchmark_start = microtime(true);
+if (getenv("BENCHMARK") === "TRUE") {
+    $benchmarks = array();
+    $benchmark_start = microtime(true);
+}
 
 include __DIR__ . DIRECTORY_SEPARATOR . "common.php";
 
@@ -10,7 +12,10 @@ if (!isset($_GET['key']) || $_GET['key'] !== getenv('API_KEY')) {
     exit;
 }
 
-$benchmarks['boot'] = round(microtime(true) - $benchmark_start, 5);
+if (getenv("BENCHMARK") === "TRUE") {
+    $benchmarks['boot'] = round(microtime(true) - $benchmark_start, 5);
+    $benchmark_start = microtime(true);
+}
 
 $get = isset($_GET['get']) ? trim(filter_var($_GET['get'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : NULL;
 switch ($get) {
@@ -47,7 +52,10 @@ switch ($get) {
             }
         }
 
-        $benchmarks['filters'] = round(microtime(true) - $benchmark_start, 5);
+        if (getenv("BENCHMARK") === "TRUE") {
+            $benchmarks['filters'] = round(microtime(true) - $benchmark_start, 5);
+            $benchmark_start = microtime(true);
+        }
 
         $balloons = array();
         $call_signs_where = array();
@@ -88,7 +96,12 @@ switch ($get) {
         $call_signs_stmt->execute();
         $call_signs_result = $call_signs_stmt->get_result();
 
-        $benchmarks['call_signs_query'] = round(microtime(true) - $benchmark_start, 5);
+        if (getenv("BENCHMARK") === "TRUE") {
+            $benchmarks['call_signs_query'] = round(microtime(true) - $benchmark_start, 5);
+            $benchmark_start = microtime(true);
+
+            $query_idx = 1;
+        }
 
         while ($call_signs_row = $call_signs_result->fetch_object()) {
             $balloon_history = array();
@@ -162,11 +175,20 @@ switch ($get) {
             }
             $history_result->close();
 
+            if (getenv("BENCHMARK") === "TRUE") {
+                $benchmarks['history_query_' . $query_idx] = round(microtime(true) - $benchmark_start, 5);
+                $benchmark_start = microtime(true);
+                $query_idx++;
+            }
+
             $balloons[$call_signs_row->call_sign] = $balloon_history;
         }
         $call_signs_result->close();
 
-        $benchmarks['history_queries'] = round(microtime(true) - $benchmark_start, 5);
+        if (getenv("BENCHMARK") === "TRUE") {
+            $benchmarks['history_queries'] = round(microtime(true) - $benchmark_start, 5);
+            $benchmark_start = microtime(true);
+        }
 
         $http_response_code = 200;
         $response = array(
@@ -178,10 +200,12 @@ switch ($get) {
         $response = array();
 }
 
-$benchmarks['end'] = round(microtime(true) - $benchmark_start, 5);
-$response = array_merge($response, array(
-    'benchmarks' => $benchmarks
-));
+if (getenv("BENCHMARK") === "TRUE") {
+    $benchmarks['end'] = round(microtime(true) - $benchmark_start, 5);
+    $response = array_merge($response, array(
+        'benchmarks' => $benchmarks
+    ));
+}
 
 http_response_code($http_response_code);
 header("Content-type:application/json");
