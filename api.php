@@ -171,12 +171,6 @@ switch ($get) {
             }
             $history_result->close();
 
-            if (getenv("BENCHMARK") === "TRUE") {
-                $benchmarks['history_query_' . $query_idx] = round(microtime(TRUE) - $benchmark_point, 5);
-                $benchmark_point = microtime(TRUE);
-                $query_idx++;
-            }
-
             $balloons[$call_signs_row->call_sign] = $balloon_history;
         }
         $call_signs_result->close();
