@@ -132,7 +132,6 @@ switch ($get) {
                 `date`,
                 `latitude`,
                 `longitude`,
-                `course`,
                 `speed`,
                 `altitude`,
                 `comment`
@@ -159,7 +158,6 @@ switch ($get) {
                     "lat" => $row->latitude,
                     "lng" => $row->longitude,
                 );
-                //if ($row->course) $packet['crs'] = $row->course;
                 if ($row->speed) $packet['s'] = $row->speed;
                 if ($row->altitude) $packet['a'] = $row->altitude;
                 if ($row->comment) $packet['c'] = $row->comment;
