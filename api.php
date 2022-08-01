@@ -159,6 +159,14 @@ switch ($get) {
 
                 $timestamp = strtotime($row->date);
 
+                if ($previous_timestamp !== NULL && ($timestamp - $previous_timestamp) < 30 && round($previous_latitude, 0) != round($row->latitude, 0) && round($previous_longitude, 0) != round($row->longitude, 0)) {
+                    $previous_timestamp = $timestamp;
+                    $previous_latitude = $row->latitude;
+                    $previous_longitude = $row->longitude;
+
+                    continue;
+                }
+
                 $packet = array(
                     "t" => $timestamp,
                     "lat" => $row->latitude,
@@ -168,15 +176,11 @@ switch ($get) {
                 if ($row->altitude) $packet['a'] = $row->altitude;
                 if ($row->comment) $packet['c'] = $row->comment;
 
+                $balloon_history[] = $packet;
+
                 $previous_timestamp = $timestamp;
                 $previous_latitude = $row->latitude;
                 $previous_longitude = $row->longitude;
-
-                if ($previous_timestamp !== NULL && ($timestamp - $previous_timestamp) <= 30 && round($previous_latitude, 0) != round($row->latitude, 0) && round($previous_longitude, 0) != round($row->longitude, 0)) {
-                    continue;
-                }
-
-                $balloon_history[] = $packet;
             }
             $history_result->close();
 
