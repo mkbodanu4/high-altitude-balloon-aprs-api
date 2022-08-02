@@ -74,7 +74,10 @@ $lang['uk'] = array(
         "Коментар",
 
     "I see you have no location saved, please send one (or QTH locator) before enabling notifications." =>
-        "Я не бачу вашої локації у моїй базі даних. Будь ласка надішліть локацію (або QTH локатор) перш ніж я зможу увімкнути вам сповіщення."
+        "Я не бачу вашої локації у моїй базі даних. Будь ласка надішліть локацію (або QTH локатор) перш ніж я зможу увімкнути вам сповіщення.",
+
+    "https://diy.manko.pro/en/high-altitude-balloon-en/" =>
+        "https://diy.manko.pro/high-altitude-balloon/"
 );
 
 $lang['ru'] = $lang['uk'];
@@ -153,5 +156,8 @@ $lang['pl'] = array(
         "Komentarz",
 
     "I see you have no location saved, please send one (or QTH locator) before enabling notifications." =>
-        "Widzę, że nie masz zapisanej lokalizacji, wyślij ją (lub lokalizator QTH) przed włączeniem powiadomień."
+        "Widzę, że nie masz zapisanej lokalizacji, wyślij ją (lub lokalizator QTH) przed włączeniem powiadomień.",
+
+    "https://diy.manko.pro/en/high-altitude-balloon-en/" =>
+        "https://diy.manko.pro/en/high-altitude-balloon-en/"
 );
