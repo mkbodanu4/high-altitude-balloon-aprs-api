@@ -32,10 +32,10 @@ switch ($get) {
                 $filter_to_date = date("Y-m-d H:i:s", $to_timestamp);
         }
 
-        $filter_south_west_lat = isset($_GET['south_west_lat']) ? trim(filter_var($_GET['south_west_lat'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION)) : NULL;
-        $filter_south_west_lng = isset($_GET['south_west_lng']) ? trim(filter_var($_GET['south_west_lng'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION)) : NULL;
-        $filter_north_east_lat = isset($_GET['north_east_lat']) ? trim(filter_var($_GET['north_east_lat'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION)) : NULL;
-        $filter_north_east_lng = isset($_GET['north_east_lng']) ? trim(filter_var($_GET['north_east_lng'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION)) : NULL;
+        $filter_south_west_lat = isset($_GET['south_west_lat']) ? filter_var($_GET['south_west_lat'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) : NULL;
+        $filter_south_west_lng = isset($_GET['south_west_lng']) ? filter_var($_GET['south_west_lng'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) : NULL;
+        $filter_north_east_lat = isset($_GET['north_east_lat']) ? filter_var($_GET['north_east_lat'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) : NULL;
+        $filter_north_east_lng = isset($_GET['north_east_lng']) ? filter_var($_GET['north_east_lng'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) : NULL;
 
         $filter_date_diff = NULL;
         $filter_precision = 2;
@@ -49,6 +49,8 @@ switch ($get) {
         }
 
         $filter_call_sign = isset($_GET['call_sign']) ? trim(filter_var($_GET['call_sign'], FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : NULL;
+
+        $filter_only_last_point = isset($_GET['only_last_point']) ? filter_var($_GET['only_last_point'], FILTER_VALIDATE_BOOLEAN) : FALSE;
 
         if (getenv("BENCHMARK") === "TRUE") {
             $benchmarks['filters'] = round(microtime(TRUE) - $benchmark_point, 5);
@@ -140,7 +142,7 @@ switch ($get) {
             FROM
                 `history`
             " . (count($history_where) > 0 ? "WHERE " . implode(" AND ", $history_where) . " " : "") . "
-            " . ($filter_call_sign === NULL && (($filter_from_date === NULL && $filter_to_date === NULL) || ($filter_date_diff !== NULL && $filter_date_diff > 864000)) ? "ORDER BY `date` DESC LIMIT 1" : "ORDER BY `date` ASC") . "
+            " . ($filter_only_last_point || ($filter_call_sign === NULL && (($filter_from_date === NULL && $filter_to_date === NULL) || ($filter_date_diff !== NULL && $filter_date_diff > 864000))) ? "ORDER BY `date` DESC LIMIT 1" : "ORDER BY `date` ASC") . "
             ;"; // Only last point if timespan more than 10 days
             $history_stmt = $db->prepare($history_query);
             if (count($history_params) > 0) {
