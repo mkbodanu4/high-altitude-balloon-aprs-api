@@ -16,7 +16,7 @@ class Telegram_API
 
     public function get_url($method, $params = array()): string
     {
-        return $this->base . $this->api_key. '/' . $method . (count($params) > 0 ? "?" . http_build_query($params) : "");
+        return $this->base . $this->api_key . '/' . $method . (count($params) > 0 ? "?" . http_build_query($params) : "");
     }
 
     public function get($method, $params = array(), $headers = array())
@@ -24,11 +24,12 @@ class Telegram_API
         return $this->get_json($this->get_url($method, $params), NULL, $headers);
     }
 
-    public function sendMessage($chat_id, $text)
+    public function sendMessage($chat_id, $text, $disable_web_page_preview = FALSE)
     {
         return $this->get_json($this->get_url("sendMessage"), json_encode(array(
             'chat_id' => $chat_id,
             'text' => $text,
+            'disable_web_page_preview' => $disable_web_page_preview
         )), array(
             "Content-type:application/json"
         ), "POST");

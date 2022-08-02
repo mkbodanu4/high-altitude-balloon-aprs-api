@@ -117,7 +117,7 @@ if (count($balloons) > 0) {
                             "https://aprs.fi/?call=" . $balloon->call_sign . "\n" .
                             __("https://diy.manko.pro/en/high-altitude-balloon-en/", $user->language_code) . "#call_sign=" . $balloon->call_sign;
                         $Telegram_API->sendLocation($user->active_chat_id, $balloon->latitude, $balloon->longitude);
-                        $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message);
+                        $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message, TRUE);
                         if ($sent->ok && $sent->result) {
                             log_event("Message to user " . $user->username . " successfully sent");
                             $message_sent_stmt = $db->prepare("INSERT INTO
