@@ -88,14 +88,14 @@ if (!$user_id) {
         `last_name` = ?,
         `username` = ?,
         `language_code` = ?,
-        `last_command` = ?,
-        " . ($last_command ? "`last_message` = ?," : "") . "
+        " . ($last_command ? "`last_command` = ?," : "") . "
+        `last_message` = ?,
         `date_updated` = UTC_TIMESTAMP()
     WHERE
         `user_id` = ?
     LIMIT 1
     ;");
-    if ($last_message)
+    if ($last_command)
         $update_user_stmt->bind_param('iissssssi',
             $active_chat_id,
             $telegram_user_id,
