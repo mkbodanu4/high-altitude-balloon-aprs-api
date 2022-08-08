@@ -89,7 +89,22 @@ $lang['uk'] = array(
         "Сповіщення",
 
     "Location to monitor" =>
-        "Локація спостереження"
+        "Локація спостереження",
+
+    "Please tell me what minimum altitude balloon must have for notifications. Add the latin letter **m** in the end for meters or **ft** for feet, e.g. 500 m or 1600 ft. Number without units will be considered as a value in meters." =>
+        "Напишіть мені будь ласка яку найменшу висоту куля повинна мати, щоб прислати сповіщення. Додайте латинську букву **m** в кінці, якщо значення у метрах, або букви **ft** якщо у футах, наприклад, 500 m або 1600 ft. Числа без одиниць будуть вважатись значенням у метрах.",
+
+    "Please tell me maximum distance between you and balloon. Add the latin letters **km** in the end for kilometers or **mi** for miles, e.g. 300 km or 186 mi. Number without units will be considered as a value in kilometers." =>
+        "Напишіть мені будь ласка найбільшу відстань між вами і кулею, у межах якої присилати сповіщення. Додайте латинські букви **km** в кінці, якщо значення у кілометрах, або букви **mi** якщо у милях, наприклад, 300 km або 186 mi. Числа без одиниць будуть вважатись значенням у кілометрах.",
+
+    "New minimum accepted altitude successfully saved." =>
+        "Нове значення дозволеної висоти успішно збережено.",
+
+    "I can't recognize value, please try again." =>
+        "Не можу розпізнати значення, спробуйте знову.",
+
+    "New maximum accepted range successfully saved." =>
+        "Нове значення дозволеної відстані успішно збережено."
 );
 
 $lang['ru'] = $lang['uk'];
@@ -183,5 +198,20 @@ $lang['pl'] = array(
         "Powiadomienia",
 
     "Location to monitor" =>
-        "Lokalizacja do monitorowania"
+        "Lokalizacja do monitorowania",
+
+    "Please tell me what minimum altitude balloon must have for notifications. Add the latin letter **m** in the end for meters or **ft** for feet, e.g. 500 m or 1600 ft. Number without units will be considered as a value in meters." =>
+        "Proszę mi powiedzieć, jaką minimalną wysokość musi mieć balon, aby otrzymywać powiadomienia. Dodaj na końcu łacińską literę **m** dla metrów lub **ft** dla stóp, np. 500 m lub 1600 ft. Liczba bez jednostek będzie traktowana jako wartość w metrach.",
+
+    "Please tell me maximum distance between you and balloon. Add the latin letters **km** in the end for kilometers or **mi** for miles, e.g. 300 km or 186 mi. Number without units will be considered as a value in kilometers." =>
+        "Proszę podać maksymalną odległość między tobą a balonem. Dodaj łacińskie litery **km** na końcu dla kilometrów lub **mi** dla mil, np. 300 km lub 186 mil. Liczba bez jednostek będzie traktowana jako wartość w kilometrach.",
+
+    "New minimum accepted altitude successfully saved." =>
+        "Minimalna zaakceptowana wysokość Nev została pomyślnie zapisana.",
+
+    "I can't recognize value, please try again." =>
+        "Nie mogę rozpoznać wartości, spróbuj ponownie.",
+
+    "New maximum accepted range successfully saved." =>
+        "Pomyślnie zapisano nowy maksymalny zaakceptowany zakres."
 );
