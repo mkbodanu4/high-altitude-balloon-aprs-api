@@ -97,8 +97,8 @@ if (count($balloons) > 0) {
                         (!is_null($balloon->speed) ? __("Speed", $user->language_code) . ": " . round(floatval($balloon->speed), 2) . " " . __("km/h", $user->language_code) . "\n" : "") .
                         (!is_null($balloon->course) ? __("Course", $user->language_code) . ": " . intval($balloon->course) . " " . __("°", $user->language_code) . "\n" : "") .
                         __("Comment", $user->language_code) . ": " . htmlspecialchars($balloon->comment) . "\n" . "\n" .
-                        "https://aprs.fi/?call=" . $balloon->call_sign . "\n" .
-                        __("https://diy.manko.pro/en/high-altitude-balloon-en/", $user->language_code) . "#call_sign=" . $balloon->call_sign;
+                        "https://aprs.fi/?call=" . $balloon->call_sign . "\n" . "\n" .
+                        __("https://diy.manko.pro/en/high-altitude-balloon-en/", $user->language_code) . "#call_sign=" . $balloon->call_sign . '&track=1';
                     $Telegram_API->sendLocation($user->active_chat_id, $balloon->latitude, $balloon->longitude);
                     $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message, TRUE);
                     if ($sent->ok && $sent->result) {
