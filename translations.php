@@ -83,7 +83,13 @@ $lang['uk'] = array(
         "Максимальна відстань від кулі до вас",
 
     "Balloon minimum altitude" =>
-        "Мінімальна висота кулі"
+        "Мінімальна висота кулі",
+
+    "Notifications" =>
+        "Сповіщення",
+
+    "Location to monitor" =>
+        "Локація спостереження"
 );
 
 $lang['ru'] = $lang['uk'];
@@ -171,5 +177,11 @@ $lang['pl'] = array(
         "Maksymalna odległość między balonem a tobą",
 
     "Balloon minimum altitude" =>
-        "Minimalna wysokość balonu"
+        "Minimalna wysokość balonu",
+
+    "Notifications" =>
+        "Powiadomienia",
+
+    "Location to monitor" =>
+        "Lokalizacja do monitorowania"
 );

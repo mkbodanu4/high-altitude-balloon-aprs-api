@@ -231,12 +231,12 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $user_stmt->bind_result($user_enabled, $user_latitude, $user_longitude, $user_range, $user_altitude);
         $user_stmt->fetch();
 
-        $status = __("Status", $language_code) . ": " .
+        $status = __("Notifications", $language_code) . ": " .
             ($user_enabled ? __("Enabled", $language_code) : __("Disabled", $language_code)) . "\n" .
-            ($user_latitude && $user_longitude ?
-                __("Location", $language_code) . ": " : __("No location saved yet", $language_code)) . "\n" .
             __("Maximum distance between the balloon and you", $language_code) . ": " . $user_range . " " . __("km", $language_code) . "\n" .
-            __("Balloon minimum altitude", $language_code) . ": " . $user_altitude . " " . __("m", $language_code) . "\n";
+            __("Balloon minimum altitude", $language_code) . ": " . $user_altitude . " " . __("m", $language_code) . "\n" .
+            ($user_latitude && $user_longitude ?
+                __("Location to monitor", $language_code) . ": " : __("No location saved yet", $language_code));
         $Telegram_API->sendMessage($input_message->chat->id, $status);
         if ($user_latitude && $user_longitude) {
             $Telegram_API->sendLocation($input_message->chat->id, $user_latitude, $user_longitude);
