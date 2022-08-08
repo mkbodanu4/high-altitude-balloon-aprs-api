@@ -44,6 +44,7 @@ $first_name = isset($input_message->from->first_name) ? $input_message->from->fi
 $last_name = isset($input_message->from->last_name) ? $input_message->from->last_name : NULL;
 $username = isset($input_message->from->username) ? $input_message->from->username : NULL;
 $language_code = isset($input_message->from->language_code) ? $input_message->from->language_code : 'en';
+$last_command = isset($input_message->text) && strlen($input_message->text) > 1 && substr($input_message->text, 0, 1) === '/' ? trim(substr(trim($input_message->text), 0, 300)) : NULL;
 $last_message = isset($input_message->text) ? trim(substr(trim($input_message->text), 0, 300)) : NULL;
 
 if (!$user_id) {
@@ -56,6 +57,7 @@ if (!$user_id) {
         `last_name` = ?,
         `username` = ?,
         `language_code` = ?,
+        `last_command` = ?,
         `last_message` = ?,
         `enabled` = FALSE,
         `latitude` = NULL,
@@ -63,13 +65,14 @@ if (!$user_id) {
         `date_created` = UTC_TIMESTAMP(),
         `date_updated` = UTC_TIMESTAMP()
     ;");
-    $add_user_stmt->bind_param('iisssss',
+    $add_user_stmt->bind_param('iissssss',
         $active_chat_id,
         $telegram_user_id,
         $first_name,
         $last_name,
         $username,
         $language_code,
+        $last_command,
         $last_message
     );
     $add_user_stmt->execute();
@@ -85,19 +88,21 @@ if (!$user_id) {
         `last_name` = ?,
         `username` = ?,
         `language_code` = ?,
+        `last_command` = ?,
         `last_message` = ?,
         `date_updated` = UTC_TIMESTAMP()
     WHERE
         `user_id` = ?
     LIMIT 1
     ;");
-    $update_user_stmt->bind_param('iisssssi',
+    $update_user_stmt->bind_param('iissssssi',
         $active_chat_id,
         $telegram_user_id,
         $first_name,
         $last_name,
         $username,
         $language_code,
+        $last_command,
         $last_message,
         $user_id
     );
@@ -273,16 +278,16 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
 } elseif ($input_message->text === '/range') {
     $Telegram_API->sendMessage($input_message->chat->id, __("Please tell me maximum distance between you and balloon. Add the latin letters **km** in the end for kilometers or **mi** for miles, e.g. 300 km or 186 mi. Number without units will be considered as a value in kilometers.", $language_code));
 } else {
-    $user_last_message = NULL;
-    $user_stmt = $db->prepare("SELECT `last_message` FROM `users` WHERE `user_id` = ? LIMIT 1;");
+    $user_last_command = NULL;
+    $user_stmt = $db->prepare("SELECT `last_command` FROM `users` WHERE `user_id` = ? LIMIT 1;");
     $user_stmt->bind_param('i', $user_id);
     if ($user_stmt->execute()) {
-        $user_stmt->bind_result($user_last_message);
+        $user_stmt->bind_result($user_last_command);
         $user_stmt->fetch();
     }
     $user_stmt->close();
 
-    if ($user_last_message === '/altitude') {
+    if ($user_last_command === '/altitude') {
         $altitude = NULL;
         if (preg_match("/^([0-9]{1,})[\s]{0,}(m|ft)$/si", strtolower($input_message->text), $matches)) {
             if ($matches[2] === 'ft') {
@@ -317,27 +322,9 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
             }
             $update_user_stmt->close();
         } else {
-            $update_user_stmt = $db->prepare("UPDATE
-                `users`
-            SET
-                `last_message` = ?,
-                `date_updated` = UTC_TIMESTAMP()
-            WHERE
-                `user_id` = ?
-            LIMIT 1
-            ;");
-            $update_user_stmt->bind_param('si',
-                $user_last_message,
-                $user_id
-            );
-            if ($update_user_stmt->execute()) {
-                $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code));
-            } else {
-                $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));
-            }
-            $update_user_stmt->close();
+            $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code));
         }
-    } elseif ($user_last_message === '/range') {
+    } elseif ($user_last_command === '/range') {
         $range = NULL;
         if (preg_match("/^([0-9]{1,})[\s]{0,}(km|mi)$/si", strtolower($input_message->text), $matches)) {
             if ($matches[2] === 'mi') {
@@ -372,25 +359,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
             }
             $update_user_stmt->close();
         } else {
-            $update_user_stmt = $db->prepare("UPDATE
-                `users`
-            SET
-                `last_message` = ?,
-                `date_updated` = UTC_TIMESTAMP()
-            WHERE
-                `user_id` = ?
-            LIMIT 1
-            ;");
-            $update_user_stmt->bind_param('si',
-                $user_last_message,
-                $user_id
-            );
-            if ($update_user_stmt->execute()) {
-                $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code));
-            } else {
-                $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));
-            }
-            $update_user_stmt->close();
+            $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code));
         }
     } else {
         $Telegram_API->sendMessage($input_message->chat->id, __("I don't know what to respond, try /start command.", $language_code));

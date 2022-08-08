@@ -12,6 +12,7 @@ CREATE TABLE `users`
     `longitude`        FLOAT        NULL     DEFAULT NULL,
     `range`            INT          NOT NULL DEFAULT 300,
     `altitude`         INT          NOT NULL DEFAULT 500,
+    `last_command`     VARCHAR(300) NULL     DEFAULT NULL,
     `last_message`     VARCHAR(300) NULL     DEFAULT NULL,
     `date_created`     DATETIME     NOT NULL,
     `date_updated`     DATETIME     NOT NULL,
