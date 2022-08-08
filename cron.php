@@ -7,17 +7,6 @@ $Telegram_API = new Telegram_API(getenv('TELEGRAM_API_KEY'));
 
 header("Content-type:text/plain");
 
-$ranges = array(
-    array(
-        'min' => 0,
-        'max' => 80
-    ),
-    array(
-        'min' => 80,
-        'max' => 300
-    ),
-);
-
 $balloons = array();
 $balloons_query = "SELECT
 	`max_h`.`call_sign`,
@@ -37,7 +26,7 @@ FROM (
         FROM
             `history` `h` 
         WHERE
-            `h`.`altitude` >= 500 AND
+            `h`.`altitude` IS NOT NULL AND
             `h`.`date` >= UTC_TIMESTAMP() - INTERVAL 5 MINUTE
         GROUP BY
             `h`.`call_sign`
@@ -56,10 +45,9 @@ if (count($balloons) > 0) {
     log_event("Loaded " . count($balloons) . " active ballons (within last 5 minutes)");
     foreach ($balloons as $balloon) {
         log_event("Balloon " . $balloon->call_sign);
-        foreach ($ranges as $range) {
-            $users = array();
+        $users = array();
 
-            $users_query = "SELECT
+        $users_query = "SELECT
                 *,
                 (ST_Distance_Sphere(POINT(?, ?), POINT(`longitude`, `latitude`)) / 1000) AS `distance`
             FROM
@@ -68,77 +56,70 @@ if (count($balloons) > 0) {
                 `enabled` = TRUE AND
                 `longitude` IS NOT NULL AND
                 `latitude` IS NOT NULL AND
-                " . ($range['min'] ? "(ST_Distance_Sphere(POINT(?, ?), POINT(`longitude`, `latitude`)) / 1000) > ? AND" : "") . "
-                (ST_Distance_Sphere(POINT(?, ?), POINT(`longitude`, `latitude`)) / 1000) <= ?
+                `altitude` <= ? AND
+                (ST_Distance_Sphere(POINT(?, ?), POINT(`longitude`, `latitude`)) / 1000) <= `range`
             ;";
-            $users_stmt = $db->prepare($users_query);
-            if ($range['min'])
-                $users_stmt->bind_param("ddddiddi", $balloon->longitude, $balloon->latitude, $balloon->longitude, $balloon->latitude, $range['min'], $balloon->longitude, $balloon->latitude, $range['max']);
-            else
-                $users_stmt->bind_param("ddddi", $balloon->longitude, $balloon->latitude, $balloon->longitude, $balloon->latitude, $range['max']);
-            $users_stmt->execute();
-            $users_result = $users_stmt->get_result();
-            while ($row = $users_result->fetch_object()) {
-                $users[] = $row;
-            }
-            $users_stmt->close();
+        $users_stmt = $db->prepare($users_query);
+        $users_stmt->bind_param("ddddd", $balloon->longitude, $balloon->latitude, $balloon->altitude, $balloon->longitude, $balloon->latitude);
+        $users_stmt->execute();
+        $users_result = $users_stmt->get_result();
+        while ($row = $users_result->fetch_object()) {
+            $users[] = $row;
+        }
+        $users_stmt->close();
 
-            if (count($users) > 0) {
-                log_event("Loaded " . count($users) . " users within " . $balloon->call_sign . " balloon " . ($range['min'] ? $range['min'] . "-" : "") . $range['max'] . " km range");
-                foreach ($users as $user) {
-                    $is_sent = 0;
-                    $is_sent_stmt = $db->prepare("SELECT
+        if (count($users) > 0) {
+            log_event("Loaded " . count($users) . " users within " . $balloon->call_sign . " balloon area.");
+            foreach ($users as $user) {
+                $is_sent = 0;
+                $is_sent_stmt = $db->prepare("SELECT
                         COUNT(*)
                     FROM
                         `notifications`
                     WHERE
                         `date` > (UTC_TIMESTAMP() - INTERVAL 3 HOUR) AND
                         `user_id` = ? AND
-                        `call_sign` = ? AND
-                        `range` = ?
+                        `call_sign` = ?
                     LIMIT 1
                     ;");
-                    $is_sent_stmt->bind_param('isi', $user->user_id, $balloon->call_sign, $range['max']);
-                    $is_sent_stmt->execute();
-                    $is_sent_stmt->bind_result($is_sent);
-                    $is_sent_stmt->fetch();
-                    $is_sent_stmt->close();
+                $is_sent_stmt->bind_param('is', $user->user_id, $balloon->call_sign);
+                $is_sent_stmt->execute();
+                $is_sent_stmt->bind_result($is_sent);
+                $is_sent_stmt->fetch();
+                $is_sent_stmt->close();
 
-                    if (!$is_sent) {
-                        log_event("User " . $user->username . " NOT received notification about " . $balloon->call_sign . " balloon within " . ($range['min'] ? $range['min'] . "-" : "") . $range['max'] . " km range - " . $user->distance);
-                        $telegram_message = __("There is a balloon nearby!", $user->language_code) . "\n" .
-                            __("Call sign", $user->language_code) . ": " . $balloon->call_sign . "\n" .
-                            __("Distance to you", $user->language_code) . ": " . round(floatval($user->distance), 2) . " " . __("km", $user->language_code) . "\n" .
-                            (!is_null($balloon->altitude) ? __("Altitude", $user->language_code) . ": " . round(floatval($balloon->altitude), 2) . " " . __("m", $user->language_code) . "\n" : "") .
-                            (!is_null($balloon->speed) ? __("Speed", $user->language_code) . ": " . round(floatval($balloon->speed), 2) . " " . __("km/h", $user->language_code) . "\n" : "") .
-                            (!is_null($balloon->course) ? __("Course", $user->language_code) . ": " . intval($balloon->course) . " " . __("°", $user->language_code) . "\n" : "") .
-                            __("Comment", $user->language_code) . ": " . htmlspecialchars($balloon->comment) . "\n" . "\n" .
-                            "https://aprs.fi/?call=" . $balloon->call_sign . "\n" .
-                            __("https://diy.manko.pro/en/high-altitude-balloon-en/", $user->language_code) . "#call_sign=" . $balloon->call_sign;
-                        $Telegram_API->sendLocation($user->active_chat_id, $balloon->latitude, $balloon->longitude);
-                        $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message, TRUE);
-                        if ($sent->ok && $sent->result) {
-                            log_event("Message to user " . $user->username . " successfully sent");
-                            $message_sent_stmt = $db->prepare("INSERT INTO
+                if (!$is_sent) {
+                    log_event("User " . $user->username . " NOT received notification about " . $balloon->call_sign . " balloon - " . $user->distance);
+                    $telegram_message = __("There is a balloon nearby!", $user->language_code) . "\n" .
+                        __("Call sign", $user->language_code) . ": " . $balloon->call_sign . "\n" .
+                        __("Distance to you", $user->language_code) . ": " . round(floatval($user->distance), 2) . " " . __("km", $user->language_code) . "\n" .
+                        (!is_null($balloon->altitude) ? __("Altitude", $user->language_code) . ": " . round(floatval($balloon->altitude), 2) . " " . __("m", $user->language_code) . "\n" : "") .
+                        (!is_null($balloon->speed) ? __("Speed", $user->language_code) . ": " . round(floatval($balloon->speed), 2) . " " . __("km/h", $user->language_code) . "\n" : "") .
+                        (!is_null($balloon->course) ? __("Course", $user->language_code) . ": " . intval($balloon->course) . " " . __("°", $user->language_code) . "\n" : "") .
+                        __("Comment", $user->language_code) . ": " . htmlspecialchars($balloon->comment) . "\n" . "\n" .
+                        "https://aprs.fi/?call=" . $balloon->call_sign . "\n" .
+                        __("https://diy.manko.pro/en/high-altitude-balloon-en/", $user->language_code) . "#call_sign=" . $balloon->call_sign;
+                    $Telegram_API->sendLocation($user->active_chat_id, $balloon->latitude, $balloon->longitude);
+                    $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message, TRUE);
+                    if ($sent->ok && $sent->result) {
+                        log_event("Message to user " . $user->username . " successfully sent");
+                        $message_sent_stmt = $db->prepare("INSERT INTO
                                 `notifications`
                             SET
                                 `date` = UTC_TIMESTAMP(),
                                 `user_id` = ?,
-                                `call_sign` = ?,
-                                `range` = ?
+                                `call_sign` = ?
                             ;");
-                            $message_sent_stmt->bind_param('isi',
-                                $user->user_id,
-                                $balloon->call_sign,
-                                $range['max']);
-                            if ($message_sent_stmt->execute()) {
-                                log_event("Event about sending message to user " . $user->username . " successfully saved to database");
-                            }
-                            $message_sent_stmt->close();
+                        $message_sent_stmt->bind_param('is',
+                            $user->user_id,
+                            $balloon->call_sign);
+                        if ($message_sent_stmt->execute()) {
+                            log_event("Event about sending message to user " . $user->username . " successfully saved to database");
                         }
-                    } else {
-                        log_event("User " . $user->username . " ALREADY received notification about " . $balloon->call_sign . " balloon within" . ($range['min'] ? $range['min'] . "-" : "") . $range['max'] . " km range - " . $user->distance);
+                        $message_sent_stmt->close();
                     }
+                } else {
+                    log_event("User " . $user->username . " ALREADY received notification about " . $balloon->call_sign . " balloon.");
                 }
             }
         }
