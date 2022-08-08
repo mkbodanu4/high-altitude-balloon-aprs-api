@@ -318,6 +318,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
                 `users`
             SET
                 `altitude` = ?,
+                `last_command` = NULL,
                 `date_updated` = UTC_TIMESTAMP()
             WHERE
                 `user_id` = ?
@@ -355,6 +356,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
                 `users`
             SET
                 `range` = ?,
+                `last_command` = NULL,
                 `date_updated` = UTC_TIMESTAMP()
             WHERE
                 `user_id` = ?
