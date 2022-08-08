@@ -28,7 +28,6 @@ $balloons_query = "SELECT
     `h2`.`course`,
     `h2`.`speed`,
     `h2`.`altitude`,
-    `h2`.`daodatumbyte`,
     `h2`.`comment`,
     `h2`.`raw`
 FROM (
