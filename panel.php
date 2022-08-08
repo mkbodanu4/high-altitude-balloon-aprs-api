@@ -23,56 +23,61 @@ if (count($_POST) > 0) {
             exit;
             break;
         case 'send_message':
-            $submit = trim(filter_var($_POST['submit'], FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-            $message = trim($_POST['message']); // To have all special chars in message, this must be not validated
+            if (isset($_SESSION['logged']) && $_SESSION['logged'] === TRUE) {
+                $submit = trim(filter_var($_POST['submit'], FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+                $message = trim($_POST['message']); // To have all special chars in message, this must be not validated
 
-            $messages = array();
-            foreach (array_keys($lang) as $lang_code) {
-                $messages[$lang_code] = trim($_POST['message_' . $lang_code]); // To have all special chars in message, this must be not validated
-            }
+                $messages = array();
+                foreach (array_keys($lang) as $lang_code) {
+                    $messages[$lang_code] = trim($_POST['message_' . $lang_code]); // To have all special chars in message, this must be not validated
+                }
 
-            $result_message = '';
-            if ($message && count($messages) > 0) {
-                $Telegram_API = new Telegram_API(getenv('TELEGRAM_API_KEY'));
+                $result_message = '';
+                if ($message && count($messages) > 0) {
+                    $Telegram_API = new Telegram_API(getenv('TELEGRAM_API_KEY'));
 
-                $users = array();
-                $users_query = "SELECT
+                    $users = array();
+                    $users_query = "SELECT
                     *
                 FROM
                     `users`
                 WHERE
                     `enabled` = TRUE
                 ;";
-                $users_stmt = $db->prepare($users_query);
-                $users_stmt->execute();
-                $users_result = $users_stmt->get_result();
-                while ($row = $users_result->fetch_object()) {
-                    $users[] = $row;
-                }
-                $users_stmt->close();
-
-                foreach ($users as $user) {
-                    $telegram_message = isset($messages[$user->language_code]) ? $messages[$user->language_code] : $message;
-                    $telegram_message = str_replace('\n', "\n", $telegram_message); // New lines with \n symbol
-                    $result_message .= $user->first_name . ' ' . $user->language_code . '>' . substr(filter_var($telegram_message, FILTER_SANITIZE_FULL_SPECIAL_CHARS), 0, 50);
-                    if ($submit === "Send") {
-                        $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message, TRUE);
-                        if ($sent->ok && $sent->result) {
-                            $result_message .= ' sent';
-                        } else {
-                            $result_message .= ' not sent';
-                        }
+                    $users_stmt = $db->prepare($users_query);
+                    $users_stmt->execute();
+                    $users_result = $users_stmt->get_result();
+                    while ($row = $users_result->fetch_object()) {
+                        $users[] = $row;
                     }
-                    $result_message .= '<br/>';
+                    $users_stmt->close();
+
+                    foreach ($users as $user) {
+                        $telegram_message = isset($messages[$user->language_code]) ? $messages[$user->language_code] : $message;
+                        $telegram_message = str_replace('\n', "\n", $telegram_message); // New lines with \n symbol
+                        $result_message .= $user->first_name . ' ' . $user->language_code . '>' . substr(filter_var($telegram_message, FILTER_SANITIZE_FULL_SPECIAL_CHARS), 0, 50);
+                        if ($submit === "Send") {
+                            $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message, TRUE);
+                            if ($sent->ok && $sent->result) {
+                                $result_message .= ' sent';
+                            } else {
+                                $result_message .= ' not sent';
+                            }
+                        }
+                        $result_message .= '<br/>';
+                    }
+
+                    $_SESSION['result'] = 'success';
+                } else {
+                    $_SESSION['result'] = 'danger';
+                    $result_message = 'No messages received';
                 }
 
-                $_SESSION['result'] = 'success';
+                $_SESSION['message'] = $result_message;
             } else {
-                $_SESSION['result'] = 'danger';
-                $result_message = 'No messages received';
+                header("Location: panel.php");
+                exit;
             }
-
-            $_SESSION['message'] = $result_message;
             break;
         default:
             header("Location: panel.php");
