@@ -77,7 +77,13 @@ $lang['uk'] = array(
         "Я не бачу вашої локації у моїй базі даних. Будь ласка надішліть локацію (або QTH локатор) перш ніж я зможу увімкнути вам сповіщення.",
 
     "https://diy.manko.pro/en/high-altitude-balloon-en/" =>
-        "https://diy.manko.pro/high-altitude-balloon/"
+        "https://diy.manko.pro/high-altitude-balloon/",
+
+    "Maximum distance between the balloon and you" =>
+        "Максимальна відстань від кулі до вас",
+
+    "Balloon minimum altitude" =>
+        "Мінімальна висота кулі"
 );
 
 $lang['ru'] = $lang['uk'];
@@ -159,5 +165,11 @@ $lang['pl'] = array(
         "Widzę, że nie masz zapisanej lokalizacji, wyślij ją (lub lokalizator QTH) przed włączeniem powiadomień.",
 
     "https://diy.manko.pro/en/high-altitude-balloon-en/" =>
-        "https://diy.manko.pro/en/high-altitude-balloon-en/"
+        "https://diy.manko.pro/en/high-altitude-balloon-en/",
+
+    "Maximum distance between the balloon and you" =>
+        "Maksymalna odległość między balonem a tobą",
+
+    "Balloon minimum altitude" =>
+        "Minimalna wysokość balonu"
 );
