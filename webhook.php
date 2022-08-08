@@ -89,23 +89,35 @@ if (!$user_id) {
         `username` = ?,
         `language_code` = ?,
         `last_command` = ?,
-        `last_message` = ?,
+        " . ($last_command ? "`last_message` = ?," : "") . "
         `date_updated` = UTC_TIMESTAMP()
     WHERE
         `user_id` = ?
     LIMIT 1
     ;");
-    $update_user_stmt->bind_param('iissssssi',
-        $active_chat_id,
-        $telegram_user_id,
-        $first_name,
-        $last_name,
-        $username,
-        $language_code,
-        $last_command,
-        $last_message,
-        $user_id
-    );
+    if ($last_message)
+        $update_user_stmt->bind_param('iissssssi',
+            $active_chat_id,
+            $telegram_user_id,
+            $first_name,
+            $last_name,
+            $username,
+            $language_code,
+            $last_command,
+            $last_message,
+            $user_id
+        );
+    else
+        $update_user_stmt->bind_param('iisssssi',
+            $active_chat_id,
+            $telegram_user_id,
+            $first_name,
+            $last_name,
+            $username,
+            $language_code,
+            $last_message,
+            $user_id
+        );
     $update_user_stmt->execute();
     $update_user_stmt->close();
 }
