@@ -104,7 +104,13 @@ $lang['uk'] = array(
         "Не можу розпізнати значення, спробуйте знову.",
 
     "New maximum accepted range successfully saved." =>
-        "Нове значення дозволеної відстані успішно збережено."
+        "Нове значення дозволеної відстані успішно збережено.",
+
+    "Frequencies" =>
+        "Частоти",
+
+    "or" =>
+        "або",
 );
 
 $lang['ru'] = $lang['uk'];
@@ -213,5 +219,11 @@ $lang['pl'] = array(
         "Nie mogę rozpoznać wartości, spróbuj ponownie.",
 
     "New maximum accepted range successfully saved." =>
-        "Pomyślnie zapisano nowy maksymalny zaakceptowany zakres."
+        "Pomyślnie zapisano nowy maksymalny zaakceptowany zakres.",
+
+    "Frequencies" =>
+        "Częstotliwości",
+
+    "or" =>
+        "lub",
 );

@@ -95,10 +95,40 @@ if (count($balloons) > 0) {
                         __("Distance to you", $user->language_code) . ": " . round(floatval($user->distance), 2) . " " . __("km", $user->language_code) . "\n" .
                         (!is_null($balloon->altitude) ? __("Altitude", $user->language_code) . ": " . round(floatval($balloon->altitude), 2) . " " . __("m", $user->language_code) . "\n" : "") .
                         (!is_null($balloon->speed) ? __("Speed", $user->language_code) . ": " . round(floatval($balloon->speed), 2) . " " . __("km/h", $user->language_code) . "\n" : "") .
-                        (!is_null($balloon->course) ? __("Course", $user->language_code) . ": " . intval($balloon->course) . " " . __("°", $user->language_code) . "\n" : "") .
-                        __("Comment", $user->language_code) . ": " . htmlspecialchars($balloon->comment) . "\n" . "\n" .
-                        "https://aprs.fi/?call=" . $balloon->call_sign . "\n" . "\n" .
+                        (!is_null($balloon->course) ? __("Course", $user->language_code) . ": " . intval($balloon->course) . " " . __("°", $user->language_code) . "\n" : "");
+
+                    if ($balloon->comment) {
+                        $frequencies = array();
+                        $parts = array();
+
+                        if (preg_match('/\s(wspr)\s/i', $balloon->comment, $parts)) {
+                            $frequencies[] = '14,097 MHz ' . $parts[1];
+                        }
+
+                        if (preg_match('/(aprs)[\-|\s]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
+                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '') . $parts[1];
+                        }
+
+                        if (preg_match('/(4\-{0,}fsk)[\-|\s]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
+                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '437.600 MHz ') . $parts[1];
+                        }
+
+                        if (preg_match('/(sstv)[\-|\s]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
+                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '144.500 MHz ' . __("or", $user->language_code) . ' 433.400 MHz ') . $parts[1];
+                        }
+
+                        $telegram_message .= __("Frequencies", $user->language_code) . ": ";
+                        if (count($frequencies) > 0) {
+                            $telegram_message .= implode('; ', $frequencies);
+                        }
+                        $telegram_message .= ' APRS' . "\n" . "\n";
+
+                        $telegram_message .= __("Comment", $user->language_code) . ": " . htmlspecialchars($balloon->comment) . "\n" . "\n";
+                    }
+
+                    $telegram_message .= "https://aprs.fi/?call=" . $balloon->call_sign . "\n" . "\n" .
                         __("https://diy.manko.pro/en/high-altitude-balloon-en/", $user->language_code) . "#call_sign=" . $balloon->call_sign . '&track=1';
+
                     $Telegram_API->sendLocation($user->active_chat_id, $balloon->latitude, $balloon->longitude);
                     $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message, TRUE);
                     if ($sent->ok && $sent->result) {
