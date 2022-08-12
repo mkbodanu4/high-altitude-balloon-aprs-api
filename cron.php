@@ -109,6 +109,10 @@ if (count($balloons) > 0) {
                             $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '') . $parts[1];
                         }
 
+                        if (preg_match('/(lora)[\-|\s]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
+                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '') . $parts[1];
+                        }
+
                         if (preg_match('/(4\-{0,}fsk)[\-|\s]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
                             $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '437.600 MHz ') . $parts[1];
                         }
