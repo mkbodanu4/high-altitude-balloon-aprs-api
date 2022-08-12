@@ -262,4 +262,40 @@ $lang['pl'] = array(
 
     "or" =>
         "lub",
+
+    "Balloons Bot" =>
+        "Balony Bot",
+
+    "Thanks for providing the location, I successfully saved your coordinates. Please send me message Enable to enable notifications or Disable to disable them." =>
+        "Dziękuję za podanie lokalizacji, udało mi się zapisać Twoje współrzędne. Proszę o wiadomość Włącz, aby włączyć powiadomienia lub Wyłącz, aby je wyłączyć.",
+
+    "Thanks for providing QTH location, I successfully decoded and saved your coordinates. Check that coordinates in location I just sent. Notification automatically enabled, send message Disable to disable notifications." =>
+        "Dzięki za podanie lokalizacji QTH, udało mi się odkodować i zapisać twoje współrzędne. Sprawdź współrzędne w miejscu, które właśnie wysłałem. Powiadomienie włączone automatycznie, wyślij wiadomość Wyłącz, aby wyłączyć powiadomienia.",
+
+    "Enable" =>
+        "Włącz",
+
+    "Notifications enabled. I will drop you a message after detecting the balloon nearby. Feel free to disable notifications with message Disable." =>
+        "Powiadomienia włączone. Wyślę ci wiadomość po wykryciu pobliskiego balonu. Zapraszam do wyłączenia powiadomień komunikatem Wyłącz.",
+
+    "Disable" =>
+        "Wyłącz",
+
+    "Notifications were disabled. Send message Enable to bring them back." =>
+        "Powiadomienia zostały wyłączone. Wyślij wiadomość Włącz, aby je przywrócić.",
+
+    "Range" =>
+        "Zasięg",
+
+    "Commands" =>
+        "Polecenia",
+
+    "You can ask me to do something with one of the next commands:\n\nEnable - enable notifications;\nDisable - disable notifications;\nStatus - get your configurations;\nAltitude - set minimum altitude that balloon must have to send notification;\nRange - set maximum range between balloon and you;\nCommands - get list of possible commands." =>
+        "Możesz poprosić mnie o zrobienie czegoś za pomocą jednego z następnych poleceń:\n\nWłącz - włącz powiadomienia;\nWyłącz - wyłącz powiadomienia;\nStatus - pobierz swoje konfiguracje;\nWysokość - ustaw minimalną wysokość, jaką balon musi mieć, aby wysłać powiadomienie;\nZasięg - ustaw maksymalny zasięg między balonem a tobą;\nPolecenia - pobierz listę możliwych poleceń.",
+
+    "I don't know what to respond. Send me message Commands to get list of possible commands." =>
+        "Nie wiem, co odpowiedzieć. Wyślij mi wiadomość Polecenia, aby uzyskać listę możliwych poleceń.",
+
+    "Provide location" =>
+        "Podaj lokalizację"
 );
