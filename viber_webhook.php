@@ -63,12 +63,12 @@ if (isset($request->message)) {
 }
 
 $commands = array(
-    'Enable',
-    'Disable',
-    'Status',
-    'Altitude',
-    'Range',
-    'Commands'
+    __('Enable', $language_code),
+    __('Disable', $language_code),
+    __('Status', $language_code),
+    __('Altitude', $language_code),
+    __('Range', $language_code),
+    __('Commands', $language_code)
 );
 
 if ($viber_user_id) {

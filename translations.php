@@ -140,7 +140,10 @@ $lang['uk'] = array(
         "Команди",
 
     "You can ask me to do something with one of the next commands:\n\nEnable - enable notifications;\nDisable - disable notifications;\nStatus - get your configurations;\nAltitude - set minimum altitude that balloon must have to send notification;\nRange - set maximum range between balloon and you;\nCommands - get list of possible commands." =>
-        "Ви можете попросити мене виконати дію однією з наступних команд:\n\nУвімкнути - увімкнути сповіщення;\nВимкнути - вимкнути сповіщення;\nСтан - дізнатись свої налаштування;\nВисота - встановити мінімальну висоту, яку повинна мати куля, щоб ви отримали сповіщення;\nВідстань - встановити максимальну відстань між кулею і вами;\nКоманди - отримати цей список команд."
+        "Ви можете попросити мене виконати дію однією з наступних команд:\n\nУвімкнути - увімкнути сповіщення;\nВимкнути - вимкнути сповіщення;\nСтан - дізнатись свої налаштування;\nВисота - встановити мінімальну висоту, яку повинна мати куля, щоб ви отримали сповіщення;\nВідстань - встановити максимальну відстань між кулею і вами;\nКоманди - отримати цей список команд.",
+
+    "I don't know what to respond. Send me message Commands to get list of possible commands." =>
+        "Я не знаю що відповісти.Відправте мені слово Команди, щоб отримати список зрозумілих мені дій."
 );
 
 $lang['ru'] = $lang['uk'];
