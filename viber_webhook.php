@@ -400,6 +400,11 @@ switch ($request->event) {
                     "DefaultHeight" => FALSE,
                     "Buttons" => array(
                         array(
+                            "ActionType" => "location-picker",
+                            "ActionBody" => 'monitoring_location',
+                            "Text" => __("Provide location", $language_code)
+                        ),
+                        array(
                             "ActionType" => "reply",
                             "ActionBody" => __("Enable", $language_code),
                             "Text" => __("Enable", $language_code)
