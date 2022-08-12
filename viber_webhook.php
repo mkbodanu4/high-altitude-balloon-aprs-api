@@ -157,7 +157,18 @@ switch ($request->event) {
                 "avatar" => trim(getenv('APP_URL'), "/") . "/balloon.png"
             ),
             'type' => "text",
-            "text" => __("Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby.\n\nPlease send any location as attachment (it could be done with your smartphone only), so I could know the place you are interested in.\nInstruction (with screenshots) available here: https://diy.manko.pro/en/high-altitude-balloon-en/#bot\n\nAlso you can send QTH locator (like KN29at) and I will try to decode coordinates from it.\n\nLooking forward for your location attachment or QTH locator.", $language_code)
+            "text" => __("Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby.\n\nPlease send any location as attachment (it could be done with your smartphone only), so I could know the place you are interested in.\nInstruction (with screenshots) available here: https://diy.manko.pro/en/high-altitude-balloon-en/#bot\n\nAlso you can send QTH locator (like KN29at) and I will try to decode coordinates from it.\n\nLooking forward for your location attachment or QTH locator.", $language_code),
+            array(
+                "Type" => "keyboard",
+                "DefaultHeight" => FALSE,
+                "Buttons" => array(
+                    array(
+                        "ActionType" => "location-picker",
+                        "ActionBody" => '',
+                        "Text" => __("Provide location", $language_code)
+                    )
+                )
+            )
         ));
         break;
     case 'message':
@@ -183,7 +194,18 @@ switch ($request->event) {
                 $Viber_API->send_message($viber_user_id,
                     __('Balloons Bot', $language_code),
                     trim(getenv('APP_URL'), "/") . "/balloon.png",
-                    __("Thanks for providing the location, I successfully saved your coordinates. Please send me message Enable to enable notifications or Disable to disable them.", $language_code));
+                    __("Thanks for providing the location, I successfully saved your coordinates. Please send me message Enable to enable notifications or Disable to disable them.", $language_code),
+                    array(
+                        "Type" => "keyboard",
+                        "DefaultHeight" => FALSE,
+                        "Buttons" => array(
+                            array(
+                                "ActionType" => "reply",
+                                "ActionBody" => __("Enable", $language_code),
+                                "Text" => __("Enable", $language_code)
+                            ),
+                        )
+                    ));
             } else {
                 $Viber_API->send_message($viber_user_id,
                     __('Balloons Bot', $language_code),
@@ -308,7 +330,18 @@ switch ($request->event) {
                 $Viber_API->send_message($viber_user_id,
                     __('Balloons Bot', $language_code),
                     trim(getenv('APP_URL'), "/") . "/balloon.png",
-                    __("Notifications were disabled. Send message Enable to bring them back.", $language_code));
+                    __("Notifications were disabled. Send message Enable to bring them back.", $language_code),
+                    array(
+                        "Type" => "keyboard",
+                        "DefaultHeight" => FALSE,
+                        "Buttons" => array(
+                            array(
+                                "ActionType" => "reply",
+                                "ActionBody" => __("Enable", $language_code),
+                                "Text" => __("Enable", $language_code)
+                            ),
+                        )
+                    ));
             } else {
                 $Viber_API->send_message($viber_user_id,
                     __('Balloons Bot', $language_code),
