@@ -164,7 +164,7 @@ switch ($request->event) {
                 "Buttons" => array(
                     array(
                         "ActionType" => "location-picker",
-                        "ActionBody" => '',
+                        "ActionBody" => 'monitoring_location',
                         "Text" => __("Provide location", $language_code)
                     )
                 )
@@ -548,6 +548,11 @@ switch ($request->event) {
                                 "ActionBody" => __("Commands", $language_code),
                                 "Text" => __("Commands", $language_code)
                             ),
+                            array(
+                                "ActionType" => "location-picker",
+                                "ActionBody" => 'monitoring_location',
+                                "Text" => __("Provide location", $language_code)
+                            )
                         )
                     ));
             }
