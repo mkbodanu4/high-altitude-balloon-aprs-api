@@ -504,7 +504,17 @@ switch ($request->event) {
                 $Viber_API->send_message($viber_user_id,
                     __('Balloons Bot', $language_code),
                     trim(getenv('APP_URL'), "/") . "/balloon.png",
-                    __("I don't know what to respond. Send me message Commands to get list of possible commands.", $language_code));
+                    __("I don't know what to respond. Send me message Commands to get list of possible commands.", $language_code),
+                    array(
+                        "DefaultHeight" => TRUE,
+                        "Buttons" => array(
+                            array(
+                                "ActionType" => "reply",
+                                "ActionBody" => __("Commands", $language_code),
+                                "Text" => __("Commands", $language_code)
+                            ),
+                        )
+                    ));
             }
         }
         break;
