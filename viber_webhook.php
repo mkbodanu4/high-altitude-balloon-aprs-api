@@ -158,7 +158,7 @@ switch ($request->event) {
             ),
             'type' => "text",
             "text" => __("Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby.\n\nPlease send any location as attachment (it could be done with your smartphone only), so I could know the place you are interested in.\nInstruction (with screenshots) available here: https://diy.manko.pro/en/high-altitude-balloon-en/#bot\n\nAlso you can send QTH locator (like KN29at) and I will try to decode coordinates from it.\n\nLooking forward for your location attachment or QTH locator.", $language_code),
-            array(
+            'keyboard' => array(
                 "Type" => "keyboard",
                 "DefaultHeight" => FALSE,
                 "Buttons" => array(
