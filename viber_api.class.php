@@ -38,6 +38,7 @@ class Viber_API
     public function send_message($receiver, $sender_name, $sender_avatar, $text, $keyboard = NULL)
     {
         $request = array(
+            'min_api_version' => 3,
             'receiver' => $receiver,
             'sender' => array(
                 'name' => $sender_name,
@@ -55,6 +56,7 @@ class Viber_API
     public function send_location($receiver, $sender_name, $sender_avatar, $latitude, $longitude)
     {
         return $this->post("send_message", array(
+            'min_api_version' => 3,
             'receiver' => $receiver,
             'sender' => array(
                 'name' => $sender_name,

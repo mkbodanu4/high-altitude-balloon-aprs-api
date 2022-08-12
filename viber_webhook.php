@@ -152,6 +152,7 @@ switch ($request->event) {
         http_response_code(200);
         header("Content-type: application/json");
         echo json_encode(array(
+            'min_api_version' => 3,
             'sender' => array(
                 'name' => __('Balloons Bot', $language_code),
                 "avatar" => trim(getenv('APP_URL'), "/") . "/balloon.png"
