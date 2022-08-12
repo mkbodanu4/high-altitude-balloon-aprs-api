@@ -35,9 +35,9 @@ class Viber_API
         )), "POST");
     }
 
-    public function send_message($receiver, $sender_name, $sender_avatar, $text)
+    public function send_message($receiver, $sender_name, $sender_avatar, $text, $keyboard = NULL)
     {
-        return $this->post("send_message", array(
+        $request = array(
             'receiver' => $receiver,
             'sender' => array(
                 'name' => $sender_name,
@@ -45,7 +45,11 @@ class Viber_API
             ),
             'type' => 'text',
             'text' => $text,
-        ));
+        );
+        if ($keyboard)
+            $request['keyboard'] = $keyboard;
+
+        return $this->post("send_message", $request);
     }
 
     public function send_location($receiver, $sender_name, $sender_avatar, $latitude, $longitude)

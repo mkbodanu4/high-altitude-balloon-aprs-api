@@ -360,7 +360,42 @@ switch ($request->event) {
             $Viber_API->send_message($viber_user_id,
                 __('Balloons Bot', $language_code),
                 trim(getenv('APP_URL'), "/") . "/balloon.png",
-                __("You can ask me to do something with one of the next commands:\n\nEnable - enable notifications;\nDisable - disable notifications;\nStatus - get your configurations;\nAltitude - set minimum altitude that balloon must have to send notification;\nRange - set maximum range between balloon and you;\nCommands - get list of possible commands.", $language_code));
+                __("You can ask me to do something with one of the next commands:\n\nEnable - enable notifications;\nDisable - disable notifications;\nStatus - get your configurations;\nAltitude - set minimum altitude that balloon must have to send notification;\nRange - set maximum range between balloon and you;\nCommands - get list of possible commands.", $language_code),
+                array(
+                    "DefaultHeight" => TRUE,
+                    "Buttons" => array(
+                        array(
+                            "ActionType" => "reply",
+                            "ActionBody" => __("Enable", $language_code),
+                            "Text" => __("Enable", $language_code)
+                        ),
+                        array(
+                            "ActionType" => "reply",
+                            "ActionBody" => __("Disable", $language_code),
+                            "Text" => __("Disable", $language_code)
+                        ),
+                        array(
+                            "ActionType" => "reply",
+                            "ActionBody" => __("Status", $language_code),
+                            "Text" => __("Status", $language_code)
+                        ),
+                        array(
+                            "ActionType" => "reply",
+                            "ActionBody" => __("Altitude", $language_code),
+                            "Text" => __("Altitude", $language_code)
+                        ),
+                        array(
+                            "ActionType" => "reply",
+                            "ActionBody" => __("Range", $language_code),
+                            "Text" => __("Range", $language_code)
+                        ),
+                        array(
+                            "ActionType" => "reply",
+                            "ActionBody" => __("Commands", $language_code),
+                            "Text" => __("Commands", $language_code)
+                        ),
+                    )
+                ));
         } else {
             $user_last_command = NULL;
             $user_stmt = $db->prepare("SELECT `last_command` FROM `viber_users` WHERE `user_id` = ? LIMIT 1;");
