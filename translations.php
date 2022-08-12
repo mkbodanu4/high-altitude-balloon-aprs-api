@@ -111,6 +111,36 @@ $lang['uk'] = array(
 
     "or" =>
         "або",
+
+    "Balloons Bot" =>
+        "Бот повітряних куль",
+
+    "Thanks for providing the location, I successfully saved your coordinates. Please send me message Enable to enable notifications or Disable to disable them." =>
+        "Дякую за надану локацію, я успішно зберіг ці координати. Будь ласка відправте мені слово Увімкнути щоб включити сповіщення або слово Вимкнути щоб вимкнути їх.",
+
+    "Thanks for providing QTH location, I successfully decoded and saved your coordinates. Check that coordinates in location I just sent. Notification automatically enabled, send message Disable to disable notifications." =>
+        "Дякую за наданий QTH локатор, я успішно декодував і зберіг ваші координати. Але перевірте їх, я от щойно відправив вам локацію. Сповіщення були автоматично увімкнені, але ви можете вимкнути їх відправивши мені слово Вимкнути.",
+
+    "Enable" =>
+        "Увімкнути",
+
+    "Notifications enabled. I will drop you a message after detecting the balloon nearby. Feel free to disable notifications with message Disable." =>
+        "Сповіщення увімкнені. Я напишу вам повідомлення коли побачу кулю біля вас. Якщо бажаєте, ви можете вимкнути сповіщення, відправивши мені слово Вимкнути.",
+
+    "Disable" =>
+        "Вимкнути",
+
+    "Notifications were disabled. Send message Enable to bring them back." =>
+        "Сповіщення вимкнені. Надішліть слово Увімкнути, щоб увімкнути їх назад.",
+
+    "Range" =>
+        "Відстань",
+
+    "Commands" =>
+        "Команди",
+
+    "You can ask me to do something with one of the next commands:\n\nEnable - enable notifications;\nDisable - disable notifications;\nStatus - get your configurations;\nAltitude - set minimum altitude that balloon must have to send notification;\nRange - set maximum range between balloon and you;\nCommands - get list of possible commands." =>
+        "Ви можете попросити мене виконати дію однією з наступних команд:\n\nУвімкнути - увімкнути сповіщення;\nВимкнути - вимкнути сповіщення;\nСтан - дізнатись свої налаштування;\nВисота - встановити мінімальну висоту, яку повинна мати куля, щоб ви отримали сповіщення;\nВідстань - встановити максимальну відстань між кулею і вами;\nКоманди - отримати цей список команд."
 );
 
 $lang['ru'] = $lang['uk'];
