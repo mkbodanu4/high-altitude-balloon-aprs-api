@@ -101,31 +101,31 @@ if (count($balloons) > 0) {
                         $frequencies = array();
                         $parts = array();
 
-                        if (preg_match('/\s(wspr)\s/i', $balloon->comment, $parts)) {
-                            $frequencies[] = '14,097 MHz ' . $parts[1];
+                        if (preg_match('/\s{0,}(wspr)\s{0,}/i', $balloon->comment, $parts)) {
+                            $frequencies[] = '14,097 MHz ' . '(' . $parts[1] . ')';
                         }
 
-                        if (preg_match('/(aprs)[\-|\s]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
-                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '') . $parts[1];
+                        if (preg_match('/(aprs)[\-\s\@]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
+                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '') . '(' . $parts[1] . ')';
                         }
 
-                        if (preg_match('/(lora)[\-|\s]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
-                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '') . $parts[1];
+                        if (preg_match('/(lora)[\-\s\@]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
+                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '') . '(' . $parts[1] . ')';
                         }
 
-                        if (preg_match('/(4\-{0,}fsk)[\-|\s]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
-                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '437.600 MHz ') . $parts[1];
+                        if (preg_match('/(4\-{0,}fsk)[\-\s\@]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
+                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '437.600 MHz ') . '(' . $parts[1] . ')';
                         }
 
-                        if (preg_match('/(sstv)[\-|\s]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
-                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '144.500 MHz ' . __("or", $user->language_code) . ' 433.400 MHz ') . $parts[1];
+                        if (preg_match('/(sstv)[\-\s\@]{0,}(\d{3}\.\d{3}){0,}/i', $balloon->comment, $parts)) {
+                            $frequencies[] = (isset($parts[2]) ? $parts[2] . ' MHz ' : '144.500 MHz ' . __("or", $user->language_code) . ' 433.400 MHz ') . '(' . $parts[1] . ')';
                         }
 
                         $telegram_message .= __("Frequencies", $user->language_code) . ": ";
                         if (count($frequencies) > 0) {
-                            $telegram_message .= implode('; ', $frequencies);
+                            $telegram_message .= implode("\n", $frequencies);
                         }
-                        $telegram_message .= ' APRS' . "\n" . "\n";
+                        $telegram_message .= ' (APRS)' . "\n" . "\n";
 
                         $telegram_message .= __("Comment", $user->language_code) . ": " . htmlspecialchars($balloon->comment) . "\n" . "\n";
                     }
