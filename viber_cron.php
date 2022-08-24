@@ -123,7 +123,7 @@ if (count($balloons) > 0) {
 
                         $viber_message .= __("Frequencies", $user->language_code) . ": ";
                         if (count($frequencies) > 0) {
-                            $viber_message .= implode("\n", $frequencies);
+                            $viber_message .= implode("\n", $frequencies) . "\n" . "\n";
                         } else
                             $viber_message .= '(APRS)' . "\n" . "\n";
 
