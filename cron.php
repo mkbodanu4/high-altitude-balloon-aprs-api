@@ -124,8 +124,8 @@ if (count($balloons) > 0) {
                         $telegram_message .= __("Frequencies", $user->language_code) . ": ";
                         if (count($frequencies) > 0) {
                             $telegram_message .= implode("\n", $frequencies);
-                        }
-                        $telegram_message .= ' (APRS)' . "\n" . "\n";
+                        } else
+                            $telegram_message .= '(APRS)' . "\n" . "\n";
 
                         $telegram_message .= __("Comment", $user->language_code) . ": " . htmlspecialchars($balloon->comment) . "\n" . "\n";
                     }
