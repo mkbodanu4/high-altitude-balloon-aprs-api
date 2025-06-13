@@ -161,8 +161,9 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));
     }
     $update_user_stmt->close();
-} elseif (preg_match("/^\s{0,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message_text)) {
-    $qth = strtoupper(trim($input_message_text));
+} elseif (preg_match("/^\s{0,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message_text) ||
+    preg_match("/^/QTH\s{1,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message_text)) {
+    $qth = strtoupper(trim(str_replace("/QTH ", "", $input_message_text)));
 
     $chars_mapping = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // Constants.
     $int_mapping = "0123456789";
