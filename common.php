@@ -46,6 +46,9 @@ function __($str, $language_code)
 
 function log_event($s = "")
 {
-    if (getenv("ENVIRONMENT") !== 'production')
+    if (getenv("ENVIRONMENT") !== 'production') {
         echo "[" . date("Y-m-d H:i:s") . "] " . $s . "\n";
+    } else {
+        file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "logs.log", date("Y-m-d H:i:s") . " " . $s . "\n", FILE_APPEND);
+    }
 }
