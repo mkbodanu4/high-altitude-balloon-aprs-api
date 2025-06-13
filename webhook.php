@@ -136,6 +136,13 @@ if (!$user_id) {
     $update_user_stmt->close();
 }
 
+if ($is_group_chat && !strpos($input_message->text, getenv('TELEGRAM_USERNAME'))) {
+    // Ignore spam from group chats other bots
+    http_response_code(200);
+    header("Content-type:text/plain");
+    exit;
+}
+
 $input_message_text = $is_group_chat ? trim(str_replace(getenv('TELEGRAM_USERNAME'), "", $input_message->text)) : trim($input_message->text);
 
 if (isset($input_message->location) && $input_message->location->latitude && $input_message->location->longitude) {
@@ -162,7 +169,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
     }
     $update_user_stmt->close();
 } elseif (preg_match("/^\s{0,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message_text) ||
-    preg_match("/^/qth\s{1,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message_text)) {
+    preg_match("/^\/qth\s{1,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message_text)) {
     $qth = strtoupper(trim(str_replace("/qth ", "", $input_message_text)));
 
     $chars_mapping = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // Constants.
@@ -316,8 +323,10 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
     }
     $user_stmt->close();
 
-    if ($user_last_command === '/altitude') {
+    if ($user_last_command === '/altitude' ||
+        preg_match("/^\/altitude\s{1,}([0-9]{1,})[\s]{0,}(m|ft)\s{0,}$/s", $input_message_text)) {
         $altitude = NULL;
+        $input_message_text = str_replace("/altitude ", "", $input_message_text);
         if (preg_match("/^([0-9]{1,})[\s]{0,}(m|ft)$/si", strtolower($input_message_text), $matches)) {
             if ($matches[2] === 'ft') {
                 $altitude = floatval($input_message_text) * 0.3048;
@@ -354,8 +363,10 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         } else {
             $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code));
         }
-    } elseif ($user_last_command === '/range') {
+    } elseif ($user_last_command === '/range' ||
+        preg_match("/^\/range\s{1,}([0-9]{1,})[\s]{0,}(km|mi)\s{0,}$/s", $input_message_text)) {
         $range = NULL;
+        $input_message_text = str_replace("/range ", "", $input_message_text);
         if (preg_match("/^([0-9]{1,})[\s]{0,}(km|mi)$/si", strtolower($input_message_text), $matches)) {
             if ($matches[2] === 'mi') {
                 $range = floatval($input_message_text) * 1.609344;
