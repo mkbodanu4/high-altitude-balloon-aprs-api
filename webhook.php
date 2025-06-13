@@ -30,24 +30,37 @@ if (!isset($request->message)) {
 $Telegram_API = new Telegram_API(getenv('TELEGRAM_API_KEY'));
 
 $input_message = $request->message;
+$active_chat_id = $input_message->chat->id;
+$telegram_user_id = $input_message->from->id;
+$is_group_chat = $active_chat_id !== $telegram_user_id && $active_chat_id < 0;
 
-$user_id_stmt = $db->prepare("SELECT `user_id` FROM `users` WHERE `telegram_user_id` = ? LIMIT 1;");
-$user_id_stmt->bind_param('d', $input_message->from->id);
+if ($is_group_chat) {
+    $first_name = isset($input_message->chat->title) ? $input_message->chat->title : NULL;
+    $last_name = NULL;
+    $username = NULL;
+} else {
+    $first_name = isset($input_message->from->first_name) ? $input_message->from->first_name : NULL;
+    $last_name = isset($input_message->from->last_name) ? $input_message->from->last_name : NULL;
+    $username = isset($input_message->from->username) ? $input_message->from->username : NULL;
+}
+$language_code = isset($input_message->from->language_code) ? $input_message->from->language_code : 'en';
+$last_command = isset($input_message->text) && strlen($input_message->text) > 1 && substr($input_message->text, 0, 1) === '/' ? trim(substr(trim($input_message->text), 0, 300)) : NULL;
+$last_message = isset($input_message->text) ? trim(substr(trim($input_message->text), 0, 300)) : NULL;
+
+$user_id_query = $is_group_chat ?
+    "SELECT `user_id` FROM `users` WHERE `active_chat_id` = ? LIMIT 1;"
+    : "SELECT `user_id` FROM `users` WHERE `telegram_user_id` = ? LIMIT 1;";
+$user_id_query_param = $is_group_chat ? $active_chat_id : $telegram_user_id;
+
+$user_id_stmt = $db->prepare($user_id_query);
+$user_id_stmt->bind_param('d', $user_id_query_param);
 $user_id_stmt->execute();
 $user_id_stmt->bind_result($user_id);
 $user_id_stmt->fetch();
 $user_id_stmt->close();
 
-$active_chat_id = $input_message->chat->id;
-$telegram_user_id = $input_message->from->id;
-$first_name = isset($input_message->from->first_name) ? $input_message->from->first_name : NULL;
-$last_name = isset($input_message->from->last_name) ? $input_message->from->last_name : NULL;
-$username = isset($input_message->from->username) ? $input_message->from->username : NULL;
-$language_code = isset($input_message->from->language_code) ? $input_message->from->language_code : 'en';
-$last_command = isset($input_message->text) && strlen($input_message->text) > 1 && substr($input_message->text, 0, 1) === '/' ? trim(substr(trim($input_message->text), 0, 300)) : NULL;
-$last_message = isset($input_message->text) ? trim(substr(trim($input_message->text), 0, 300)) : NULL;
-
 if (!$user_id) {
+    $add_telegram_user_id = $is_group_chat ? $active_chat_id : $telegram_user_id;
     $add_user_stmt = $db->prepare("INSERT INTO
         `users`
     SET
@@ -67,7 +80,7 @@ if (!$user_id) {
     ;");
     $add_user_stmt->bind_param('iissssss',
         $active_chat_id,
-        $telegram_user_id,
+        $add_telegram_user_id,
         $first_name,
         $last_name,
         $username,
@@ -79,6 +92,7 @@ if (!$user_id) {
     $user_id = $add_user_stmt->insert_id;
     $add_user_stmt->close();
 } else {
+    $update_telegram_user_id = $is_group_chat ? $active_chat_id : $telegram_user_id;
     $update_user_stmt = $db->prepare("UPDATE
         `users`
     SET
@@ -98,7 +112,7 @@ if (!$user_id) {
     if ($last_command)
         $update_user_stmt->bind_param('iissssssi',
             $active_chat_id,
-            $telegram_user_id,
+            $update_telegram_user_id,
             $first_name,
             $last_name,
             $username,
@@ -110,7 +124,7 @@ if (!$user_id) {
     else
         $update_user_stmt->bind_param('iisssssi',
             $active_chat_id,
-            $telegram_user_id,
+            $update_telegram_user_id,
             $first_name,
             $last_name,
             $username,
@@ -121,6 +135,8 @@ if (!$user_id) {
     $update_user_stmt->execute();
     $update_user_stmt->close();
 }
+
+$input_message_text = $is_group_chat ? trim(str_replace(getenv('TELEGRAM_USERNAME'), "", $input_message->text)) : trim($input_message->text);
 
 if (isset($input_message->location) && $input_message->location->latitude && $input_message->location->longitude) {
     $update_user_stmt = $db->prepare("UPDATE
@@ -145,8 +161,8 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));
     }
     $update_user_stmt->close();
-} elseif (preg_match("/^\s{0,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message->text)) {
-    $qth = strtoupper(trim($input_message->text));
+} elseif (preg_match("/^\s{0,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message_text)) {
+    $qth = strtoupper(trim($input_message_text));
 
     $chars_mapping = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // Constants.
     $int_mapping = "0123456789";
@@ -194,7 +210,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));
     }
     $update_user_stmt->close();
-} elseif ($input_message->text === '/enable') {
+} elseif ($input_message_text === '/enable') {
     $user_latitude = NULL;
     $user_longitude = NULL;
     $user_stmt = $db->prepare("SELECT `latitude`, `longitude` FROM `users` WHERE `user_id` = ? LIMIT 1;");
@@ -227,7 +243,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
     } else {
         $Telegram_API->sendMessage($input_message->chat->id, __("I see you have no location saved, please send one (or QTH locator) before enabling notifications.", $language_code));
     }
-} elseif ($input_message->text === '/disable') {
+} elseif ($input_message_text === '/disable') {
     $update_user_stmt = $db->prepare("UPDATE
         `users`
     SET
@@ -246,7 +262,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));
     }
     $update_user_stmt->close();
-} elseif ($input_message->text === '/status') {
+} elseif ($input_message_text === '/status') {
     $user_stmt = $db->prepare("SELECT `enabled`, `latitude`, `longitude`, `range`, `altitude` FROM `users` WHERE `user_id` = ? LIMIT 1;");
     $user_stmt->bind_param('i', $user_id);
     if ($user_stmt->execute()) {
@@ -267,7 +283,7 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));
     }
     $user_stmt->close();
-} elseif ($input_message->text === '/leave_me_alone') {
+} elseif ($input_message_text === '/leave_me_alone') {
     $update_user_stmt = $db->prepare("DELETE FROM
         `users`
     WHERE
@@ -283,11 +299,11 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));
     }
     $update_user_stmt->close();
-} elseif ($input_message->text === '/start') {
+} elseif ($input_message_text === '/start') {
     $Telegram_API->sendMessage($input_message->chat->id, __("Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby.\n\nPlease send any location as attachment (it could be done with your smartphone only), so I could know the place you are interested in.\nInstruction (with screenshots) available here: https://diy.manko.pro/en/high-altitude-balloon-en/#bot\n\nAlso you can send QTH locator (like KN29at) and I will try to decode coordinates from it.\n\nLooking forward for your location attachment or QTH locator.", $language_code), TRUE);
-} elseif ($input_message->text === '/altitude') {
+} elseif ($input_message_text === '/altitude') {
     $Telegram_API->sendMessage($input_message->chat->id, __("Please tell me what minimum altitude balloon must have for notifications. Add the latin letter **m** in the end for meters or **ft** for feet, e.g. 500 m or 1600 ft. Number without units will be considered as a value in meters.", $language_code));
-} elseif ($input_message->text === '/range') {
+} elseif ($input_message_text === '/range') {
     $Telegram_API->sendMessage($input_message->chat->id, __("Please tell me maximum distance between you and balloon. Add the latin letters **km** in the end for kilometers or **mi** for miles, e.g. 300 km or 186 mi. Number without units will be considered as a value in kilometers.", $language_code));
 } else {
     $user_last_command = NULL;
@@ -301,14 +317,14 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
 
     if ($user_last_command === '/altitude') {
         $altitude = NULL;
-        if (preg_match("/^([0-9]{1,})[\s]{0,}(m|ft)$/si", strtolower($input_message->text), $matches)) {
+        if (preg_match("/^([0-9]{1,})[\s]{0,}(m|ft)$/si", strtolower($input_message_text), $matches)) {
             if ($matches[2] === 'ft') {
-                $altitude = floatval($input_message->text) * 0.3048;
+                $altitude = floatval($input_message_text) * 0.3048;
             } else {
-                $altitude = floatval($input_message->text);
+                $altitude = floatval($input_message_text);
             }
-        } elseif (is_numeric($input_message->text)) {
-            $altitude = floatval($input_message->text);
+        } elseif (is_numeric($input_message_text)) {
+            $altitude = floatval($input_message_text);
         }
 
         if ($altitude) {
@@ -339,14 +355,14 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         }
     } elseif ($user_last_command === '/range') {
         $range = NULL;
-        if (preg_match("/^([0-9]{1,})[\s]{0,}(km|mi)$/si", strtolower($input_message->text), $matches)) {
+        if (preg_match("/^([0-9]{1,})[\s]{0,}(km|mi)$/si", strtolower($input_message_text), $matches)) {
             if ($matches[2] === 'mi') {
-                $range = floatval($input_message->text) * 1.609344;
+                $range = floatval($input_message_text) * 1.609344;
             } else {
-                $range = floatval($input_message->text);
+                $range = floatval($input_message_text);
             }
-        } elseif (is_numeric($input_message->text)) {
-            $range = floatval($input_message->text);
+        } elseif (is_numeric($input_message_text)) {
+            $range = floatval($input_message_text);
         }
 
         if ($range) {
