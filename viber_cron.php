@@ -42,9 +42,9 @@ while ($row = $balloons_result->fetch_object()) {
 $balloons_stmt->close();
 
 if (count($balloons) > 0) {
-    log_event("Loaded " . count($balloons) . " active ballons (within last 5 minutes)");
+    log_event("Loaded " . count($balloons) . " active ballons (within last 5 minutes)", LOG_DEBUG_LEVEL);
     foreach ($balloons as $balloon) {
-        log_event("Balloon " . $balloon->call_sign);
+        log_event("Balloon " . $balloon->call_sign, LOG_DEBUG_LEVEL);
         $users = array();
 
         $users_query = "SELECT
@@ -69,7 +69,7 @@ if (count($balloons) > 0) {
         $users_stmt->close();
 
         if (count($users) > 0) {
-            log_event("Loaded " . count($users) . " users within " . $balloon->call_sign . " balloon area.");
+            log_event("Loaded " . count($users) . " users within " . $balloon->call_sign . " balloon area.", LOG_DEBUG_LEVEL);
             foreach ($users as $user) {
                 $is_sent = 0;
                 $is_sent_stmt = $db->prepare("SELECT
@@ -89,7 +89,7 @@ if (count($balloons) > 0) {
                 $is_sent_stmt->close();
 
                 if (!$is_sent) {
-                    log_event("User " . $user->user_id . " NOT received notification about " . $balloon->call_sign . " balloon - " . $user->distance);
+                    log_event("User " . $user->user_id . " NOT received notification about " . $balloon->call_sign . " balloon - " . $user->distance, LOG_DEBUG_LEVEL);
                     $viber_message = __("There is a balloon nearby!", $user->language_code) . "\n" .
                         __("Call sign", $user->language_code) . ": " . $balloon->call_sign . "\n" .
                         __("Distance to you", $user->language_code) . ": " . round(floatval($user->distance), 2) . " " . __("km", $user->language_code) . "\n" .
@@ -142,7 +142,7 @@ if (count($balloons) > 0) {
                         trim(getenv('APP_URL'), "/") . "/balloon.png",
                         $viber_message);
                     if (isset($sent->status) && $sent->status == '0') {
-                        log_event("Message to user " . $user->user_id . " successfully sent");
+                        log_event("Message to user " . $user->user_id . " successfully sent", LOG_DEBUG_LEVEL);
                         $message_sent_stmt = $db->prepare("INSERT INTO
                                 `viber_notifications`
                             SET
@@ -154,12 +154,12 @@ if (count($balloons) > 0) {
                             $user->user_id,
                             $balloon->call_sign);
                         if ($message_sent_stmt->execute()) {
-                            log_event("Event about sending message to user " . $user->user_id . " successfully saved to database");
+                            log_event("Event about sending message to user " . $user->user_id . " successfully saved to database", LOG_DEBUG_LEVEL);
                         }
                         $message_sent_stmt->close();
                     }
                 } else {
-                    log_event("User " . $user->user_id . " ALREADY received notification about " . $balloon->call_sign . " balloon.");
+                    log_event("User " . $user->user_id . " ALREADY received notification about " . $balloon->call_sign . " balloon.", LOG_DEBUG_LEVEL);
                 }
             }
         }

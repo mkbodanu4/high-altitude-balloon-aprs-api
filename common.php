@@ -1,6 +1,8 @@
 <?php
 
 date_default_timezone_set('UTC');
+define("LOG_DEBUG_LEVEL", 10);
+define("LOG_ERROR_LEVEL", 40);
 
 if (!file_exists(__DIR__ . DIRECTORY_SEPARATOR . ".env"))
     die('Application configuration not found.');
@@ -44,11 +46,13 @@ function __($str, $language_code)
 }
 
 
-function log_event($s = "")
+function log_event($s = "", $level = LOG_DEBUG_LEVEL)
 {
     if (getenv("ENVIRONMENT") !== 'production') {
         echo "[" . date("Y-m-d H:i:s") . "] " . $s . "\n";
-    } else {
+    }
+
+    if ($level == LOG_ERROR_LEVEL) {
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "logs.log", date("Y-m-d H:i:s") . " " . $s . "\n", FILE_APPEND);
     }
 }
