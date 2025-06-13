@@ -22,14 +22,14 @@ if ($request === NULL) {
     exit;
 }
 
-if (!isset($request->message)) {
+if (!isset($request->message) && !isset($request->edited_message)) {
     http_response_code(400);
     exit;
 }
 
 $Telegram_API = new Telegram_API(getenv('TELEGRAM_API_KEY'));
 
-$input_message = $request->message;
+$input_message = isset($request->edited_message) ? $request->edited_message : $request->message;
 $active_chat_id = $input_message->chat->id;
 $telegram_user_id = $input_message->from->id;
 $is_group_chat = $active_chat_id !== $telegram_user_id && $active_chat_id < 0;
