@@ -162,8 +162,8 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
     }
     $update_user_stmt->close();
 } elseif (preg_match("/^\s{0,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message_text) ||
-    preg_match("/^/QTH\s{1,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message_text)) {
-    $qth = strtoupper(trim(str_replace("/QTH ", "", $input_message_text)));
+    preg_match("/^/qth\s{1,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message_text)) {
+    $qth = strtoupper(trim(str_replace("/qth ", "", $input_message_text)));
 
     $chars_mapping = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // Constants.
     $int_mapping = "0123456789";
