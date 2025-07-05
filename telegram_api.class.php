@@ -24,24 +24,38 @@ class Telegram_API
         return $this->get_json($this->get_url($method, $params), NULL, $headers);
     }
 
-    public function sendMessage($chat_id, $text, $disable_web_page_preview = FALSE)
+    public function sendMessage($chat_id, $text, $message_thread_id = NULL, $disable_web_page_preview = FALSE)
     {
-        return $this->get_json($this->get_url("sendMessage"), json_encode(array(
+        $payload = array(
             'chat_id' => $chat_id,
             'text' => $text,
             'disable_web_page_preview' => $disable_web_page_preview
-        )), array(
+        );
+
+        if ($message_thread_id) {
+            $payload['message_thread_id'] = $message_thread_id;
+            $payload['chat_id'] = $chat_id . "_" . $message_thread_id;
+        }
+
+        return $this->get_json($this->get_url("sendMessage"), json_encode($payload), array(
             "Content-type:application/json"
         ), "POST");
     }
 
-    public function sendLocation($chat_id, $latitude, $longitude)
+    public function sendLocation($chat_id, $latitude, $longitude, $message_thread_id = NULL)
     {
-        return $this->get_json($this->get_url("sendLocation"), json_encode(array(
+        $payload = array(
             'chat_id' => $chat_id,
             'longitude' => $longitude,
             'latitude' => $latitude
-        )), array(
+        );
+
+        if ($message_thread_id) {
+            $payload['message_thread_id'] = $message_thread_id;
+            $payload['chat_id'] = $chat_id . "_" . $message_thread_id;
+        }
+
+        return $this->get_json($this->get_url("sendLocation"), json_encode($payload), array(
             "Content-type:application/json"
         ), "POST");
     }
