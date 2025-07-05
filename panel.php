@@ -57,7 +57,7 @@ if (count($_POST) > 0) {
                         $telegram_message = str_replace('\n', "\n", $telegram_message); // New lines with \n symbol
                         $result_message .= $user->first_name . ' ' . $user->language_code . '>' . substr(filter_var($telegram_message, FILTER_SANITIZE_FULL_SPECIAL_CHARS), 0, 50);
                         if ($submit === "Send") {
-                            $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message, NULL,TRUE);
+                            $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message, $user->message_thread_id,TRUE);
                             if ($sent->ok && $sent->result) {
                                 $result_message .= ' sent';
                             } else {

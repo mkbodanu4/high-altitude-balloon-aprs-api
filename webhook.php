@@ -33,6 +33,7 @@ $input_message = isset($request->edited_message) ? $request->edited_message : $r
 $active_chat_id = $input_message->chat->id;
 $telegram_user_id = $input_message->from->id;
 $is_group_chat = $active_chat_id !== $telegram_user_id && $active_chat_id < 0;
+$message_thread_id = $is_group_chat && isset($input_message->message_thread_id) && $input_message->message_thread_id ? $input_message->message_thread_id : NULL;
 
 if ($is_group_chat) {
     $first_name = isset($input_message->chat->title) ? $input_message->chat->title : NULL;
@@ -66,6 +67,7 @@ if (!$user_id) {
     SET
         `active_chat_id` = ?,
         `telegram_user_id` = ?,
+        `message_thread_id` = ?,
         `first_name` = ?,
         `last_name` = ?,
         `username` = ?,
@@ -78,9 +80,10 @@ if (!$user_id) {
         `date_created` = UTC_TIMESTAMP(),
         `date_updated` = UTC_TIMESTAMP()
     ;");
-    $add_user_stmt->bind_param('iissssss',
+    $add_user_stmt->bind_param('iiissssss',
         $active_chat_id,
         $add_telegram_user_id,
+        $message_thread_id,
         $first_name,
         $last_name,
         $username,
@@ -98,6 +101,7 @@ if (!$user_id) {
     SET
         `active_chat_id` = ?,
         `telegram_user_id` = ?,
+        `message_thread_id` = ?,
         `first_name` = ?,
         `last_name` = ?,
         `username` = ?,
@@ -110,9 +114,10 @@ if (!$user_id) {
     LIMIT 1
     ;");
     if ($last_command)
-        $update_user_stmt->bind_param('iissssssi',
+        $update_user_stmt->bind_param('iiissssssi',
             $active_chat_id,
             $update_telegram_user_id,
+            $message_thread_id,
             $first_name,
             $last_name,
             $username,
@@ -122,9 +127,10 @@ if (!$user_id) {
             $user_id
         );
     else
-        $update_user_stmt->bind_param('iisssssi',
+        $update_user_stmt->bind_param('iiisssssi',
             $active_chat_id,
             $update_telegram_user_id,
+            $message_thread_id,
             $first_name,
             $last_name,
             $username,
@@ -144,13 +150,6 @@ if ($is_group_chat && !strpos($input_message->text, getenv('TELEGRAM_USERNAME'))
 }
 
 $input_message_text = $is_group_chat ? trim(str_replace(getenv('TELEGRAM_USERNAME'), "", $input_message->text)) : trim($input_message->text);
-$message_thread_id = NULL;
-if ($is_group_chat && isset($input_message->message_thread_id) && $input_message->message_thread_id) {
-    $message_thread_id = $input_message->message_thread_id;
-}
-
-log_event(json_encode($input_message), LOG_ERROR_LEVEL);
-log_event(json_encode($message_thread_id), LOG_ERROR_LEVEL);
 
 if (isset($input_message->location) && $input_message->location->latitude && $input_message->location->longitude) {
     $update_user_stmt = $db->prepare("UPDATE
