@@ -146,7 +146,9 @@ $lang['uk'] = array(
         "Я не знаю що відповісти. Відправте мені слово Команди, щоб отримати список зрозумілих мені дій.",
 
     "Provide location" =>
-        "Надати локацію"
+        "Надати локацію",
+
+    "Notifications will be sent to this thread only." => "Сповіщення будуть відправлені лише у цю гілку."
 );
 
 $lang['ru'] = $lang['uk'];
@@ -297,5 +299,7 @@ $lang['pl'] = array(
         "Nie wiem, co odpowiedzieć. Wyślij mi wiadomość Polecenia, aby uzyskać listę możliwych poleceń.",
 
     "Provide location" =>
-        "Podaj lokalizację"
+        "Podaj lokalizację",
+
+    "Notifications will be sent to this thread only." => "Powiadomienia będą wysyłane tylko do tego wątku."
 );

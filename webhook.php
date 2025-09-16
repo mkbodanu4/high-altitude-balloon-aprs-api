@@ -33,7 +33,7 @@ $input_message = isset($request->edited_message) ? $request->edited_message : $r
 $active_chat_id = $input_message->chat->id;
 $telegram_user_id = $input_message->from->id;
 $is_group_chat = $active_chat_id !== $telegram_user_id && $active_chat_id < 0;
-$message_thread_id = $is_group_chat && isset($input_message->message_thread_id) && $input_message->message_thread_id ? $input_message->message_thread_id : NULL;
+$last_message_thread_id = $is_group_chat && isset($input_message->message_thread_id) && $input_message->message_thread_id ? $input_message->message_thread_id : NULL;
 
 if ($is_group_chat) {
     $first_name = isset($input_message->chat->title) ? $input_message->chat->title : NULL;
@@ -67,7 +67,7 @@ if (!$user_id) {
     SET
         `active_chat_id` = ?,
         `telegram_user_id` = ?,
-        `message_thread_id` = ?,
+        `last_message_thread_id` = ?,
         `first_name` = ?,
         `last_name` = ?,
         `username` = ?,
@@ -83,7 +83,7 @@ if (!$user_id) {
     $add_user_stmt->bind_param('iiissssss',
         $active_chat_id,
         $add_telegram_user_id,
-        $message_thread_id,
+        $last_message_thread_id,
         $first_name,
         $last_name,
         $username,
@@ -101,7 +101,7 @@ if (!$user_id) {
     SET
         `active_chat_id` = ?,
         `telegram_user_id` = ?,
-        `message_thread_id` = ?,
+        `last_message_thread_id` = ?,
         `first_name` = ?,
         `last_name` = ?,
         `username` = ?,
@@ -117,7 +117,7 @@ if (!$user_id) {
         $update_user_stmt->bind_param('iiissssssi',
             $active_chat_id,
             $update_telegram_user_id,
-            $message_thread_id,
+            $last_message_thread_id,
             $first_name,
             $last_name,
             $username,
@@ -130,7 +130,7 @@ if (!$user_id) {
         $update_user_stmt->bind_param('iiisssssi',
             $active_chat_id,
             $update_telegram_user_id,
-            $message_thread_id,
+            $last_message_thread_id,
             $first_name,
             $last_name,
             $username,
@@ -169,9 +169,9 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $user_id
     );
     if ($update_user_stmt->execute()) {
-        $Telegram_API->sendMessage($input_message->chat->id, __("Thanks for providing the location, I successfully saved your coordinates. Please /enable or /disable notifications.", $language_code), $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, __("Thanks for providing the location, I successfully saved your coordinates. Please /enable or /disable notifications.", $language_code), $last_message_thread_id);
     } else {
-        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
     }
     $update_user_stmt->close();
 } elseif (preg_match("/^\s{0,}([A-R]{2}[0-9]{2}[A-Wa-w]{0,2})\s{0,}$/s", $input_message_text) ||
@@ -218,10 +218,10 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $user_id
     );
     if ($update_user_stmt->execute()) {
-        $Telegram_API->sendMessage($input_message->chat->id, __("Thanks for providing QTH location, I successfully decoded and saved your coordinates. Check that coordinates in location I just sent. Also please /enable or /disable notifications.", $language_code), $message_thread_id);
-        $Telegram_API->sendLocation($input_message->chat->id, $latitude, $longitude, $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, __("Thanks for providing QTH location, I successfully decoded and saved your coordinates. Check that coordinates in location I just sent. Also please /enable or /disable notifications.", $language_code), $last_message_thread_id);
+        $Telegram_API->sendLocation($input_message->chat->id, $latitude, $longitude, $last_message_thread_id);
     } else {
-        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
     }
     $update_user_stmt->close();
 } elseif ($input_message_text === '/enable') {
@@ -249,13 +249,13 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
             $user_id
         );
         if ($update_user_stmt->execute()) {
-            $Telegram_API->sendMessage($input_message->chat->id, __("Notifications enabled. I will drop you a message after detecting the balloon nearby. Feel free to disable notifications with command /disable.", $language_code), $message_thread_id);
+            $Telegram_API->sendMessage($input_message->chat->id, __("Notifications enabled. I will drop you a message after detecting the balloon nearby. Feel free to disable notifications with command /disable.", $language_code), $last_message_thread_id);
         } else {
-            $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $message_thread_id);
+            $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
         }
         $update_user_stmt->close();
     } else {
-        $Telegram_API->sendMessage($input_message->chat->id, __("I see you have no location saved, please send one (or QTH locator) before enabling notifications.", $language_code), $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, __("I see you have no location saved, please send one (or QTH locator) before enabling notifications.", $language_code), $last_message_thread_id);
     }
 } elseif ($input_message_text === '/disable') {
     $update_user_stmt = $db->prepare("UPDATE
@@ -271,9 +271,9 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $user_id
     );
     if ($update_user_stmt->execute()) {
-        $Telegram_API->sendMessage($input_message->chat->id, __("Notifications were disabled. Use the command /enable to bring them back.", $language_code), $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, __("Notifications were disabled. Use the command /enable to bring them back.", $language_code), $last_message_thread_id);
     } else {
-        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
     }
     $update_user_stmt->close();
 } elseif ($input_message_text === '/status') {
@@ -289,12 +289,12 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
             __("Balloon minimum altitude", $language_code) . ": " . $user_altitude . " " . __("m", $language_code) . "\n" .
             ($user_latitude && $user_longitude ?
                 __("Location to monitor", $language_code) . ": " : __("No location saved yet", $language_code));
-        $Telegram_API->sendMessage($input_message->chat->id, $status, $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, $status, $last_message_thread_id);
         if ($user_latitude && $user_longitude) {
-            $Telegram_API->sendLocation($input_message->chat->id, $user_latitude, $user_longitude, $message_thread_id);
+            $Telegram_API->sendLocation($input_message->chat->id, $user_latitude, $user_longitude, $last_message_thread_id);
         }
     } else {
-        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
     }
     $user_stmt->close();
 } elseif ($input_message_text === '/leave_me_alone') {
@@ -308,17 +308,37 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $user_id
     );
     if ($update_user_stmt->execute()) {
-        $Telegram_API->sendMessage($input_message->chat->id, __("All your data removed from my database. You need /start again to continue our cooperation.", $language_code), $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, __("All your data removed from my database. You need /start again to continue our cooperation.", $language_code), $last_message_thread_id);
     } else {
-        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
     }
     $update_user_stmt->close();
 } elseif ($input_message_text === '/start') {
-    $Telegram_API->sendMessage($input_message->chat->id, __("Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby.\n\nPlease send any location as attachment (it could be done with your smartphone only), so I could know the place you are interested in.\nInstruction (with screenshots) available here: https://diy.manko.pro/en/high-altitude-balloon-en/#bot\n\nAlso you can send QTH locator (like KN29at) and I will try to decode coordinates from it.\n\nLooking forward for your location attachment or QTH locator.", $language_code), $message_thread_id, TRUE);
+    $Telegram_API->sendMessage($input_message->chat->id, __("Hi there! I'm monitoring amateur radio balloons and can notify you when one will pass nearby.\n\nPlease send any location as attachment (it could be done with your smartphone only), so I could know the place you are interested in.\nInstruction (with screenshots) available here: https://diy.manko.pro/en/high-altitude-balloon-en/#bot\n\nAlso you can send QTH locator (like KN29at) and I will try to decode coordinates from it.\n\nLooking forward for your location attachment or QTH locator.", $language_code), $last_message_thread_id, TRUE);
 } elseif ($input_message_text === '/altitude') {
-    $Telegram_API->sendMessage($input_message->chat->id, __("Please tell me what minimum altitude balloon must have for notifications. Add the latin letter **m** in the end for meters or **ft** for feet, e.g. 500 m or 1600 ft. Number without units will be considered as a value in meters.", $language_code), $message_thread_id);
+    $Telegram_API->sendMessage($input_message->chat->id, __("Please tell me what minimum altitude balloon must have for notifications. Add the latin letter **m** in the end for meters or **ft** for feet, e.g. 500 m or 1600 ft. Number without units will be considered as a value in meters.", $language_code), $last_message_thread_id);
 } elseif ($input_message_text === '/range') {
-    $Telegram_API->sendMessage($input_message->chat->id, __("Please tell me maximum distance between you and balloon. Add the latin letters **km** in the end for kilometers or **mi** for miles, e.g. 300 km or 186 mi. Number without units will be considered as a value in kilometers.", $language_code), $message_thread_id);
+    $Telegram_API->sendMessage($input_message->chat->id, __("Please tell me maximum distance between you and balloon. Add the latin letters **km** in the end for kilometers or **mi** for miles, e.g. 300 km or 186 mi. Number without units will be considered as a value in kilometers.", $language_code), $last_message_thread_id);
+} elseif ($input_message_text === '/set_thread') {
+    $update_user_stmt = $db->prepare("UPDATE
+        `users`
+    SET
+        `message_thread_id` = ?,
+        `date_updated` = UTC_TIMESTAMP()
+    WHERE
+        `user_id` = ?
+    LIMIT 1
+    ;");
+    $update_user_stmt->bind_param('ii',
+        $last_message_thread_id,
+        $user_id
+    );
+    if ($update_user_stmt->execute()) {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Notifications will be sent to this thread only.", $language_code), $last_message_thread_id);
+    } else {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
+    }
+    $update_user_stmt->close();
 } else {
     $user_last_command = NULL;
     $user_stmt = $db->prepare("SELECT `last_command` FROM `users` WHERE `user_id` = ? LIMIT 1;");
@@ -361,13 +381,13 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
                 $user_id
             );
             if ($update_user_stmt->execute()) {
-                $Telegram_API->sendMessage($input_message->chat->id, __("New minimum accepted altitude successfully saved.", $language_code), $message_thread_id);
+                $Telegram_API->sendMessage($input_message->chat->id, __("New minimum accepted altitude successfully saved.", $language_code), $last_message_thread_id);
             } else {
-                $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $message_thread_id);
+                $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
             }
             $update_user_stmt->close();
         } else {
-            $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code), $message_thread_id);
+            $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code), $last_message_thread_id);
         }
     } elseif ($user_last_command === '/range' ||
         preg_match("/^\/range\s{1,}([0-9]{1,})[\s]{0,}(km|mi)\s{0,}$/s", $input_message_text)) {
@@ -401,16 +421,16 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
                 $user_id
             );
             if ($update_user_stmt->execute()) {
-                $Telegram_API->sendMessage($input_message->chat->id, __("New maximum accepted range successfully saved.", $language_code), $message_thread_id);
+                $Telegram_API->sendMessage($input_message->chat->id, __("New maximum accepted range successfully saved.", $language_code), $last_message_thread_id);
             } else {
-                $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $message_thread_id);
+                $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
             }
             $update_user_stmt->close();
         } else {
-            $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code), $message_thread_id);
+            $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code), $last_message_thread_id);
         }
     } else {
-        $Telegram_API->sendMessage($input_message->chat->id, __("I don't know what to respond, try /start command.", $language_code), $message_thread_id);
+        $Telegram_API->sendMessage($input_message->chat->id, __("I don't know what to respond, try /start command.", $language_code), $last_message_thread_id);
     }
 }
 
