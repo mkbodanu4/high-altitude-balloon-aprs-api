@@ -59,6 +59,7 @@ if (isset($request->callback_query)) {
         $cb_check_stmt->close();
         if ($cb_already_blocked) {
             $Telegram_API->answerCallbackQuery($cb->id, sprintf(__("Call sign %s is already blocked.", $cb_language_code), $cb_call_sign));
+            $Telegram_API->editMessageReplyMarkup($cb_chat_id, $cb->message->message_id);
         } else {
             $cb_block_stmt = $db->prepare("INSERT INTO `blocked_call_signs` SET `user_id` = ?, `call_sign` = ?, `date_created` = UTC_TIMESTAMP();");
             $cb_block_stmt->bind_param('is', $cb_user_id, $cb_call_sign);
@@ -67,6 +68,7 @@ if (isset($request->callback_query)) {
                     ? sprintf(__("Call sign %s has been blocked. You will no longer receive notifications about %s, %s-1, %s-2, and all other related call signs.", $cb_language_code), $cb_call_sign, $cb_call_sign, $cb_call_sign, $cb_call_sign)
                     : sprintf(__("Call sign %s has been blocked. You will no longer receive notifications about it.", $cb_language_code), $cb_call_sign);
                 $Telegram_API->answerCallbackQuery($cb->id, $cb_answer);
+                $Telegram_API->editMessageReplyMarkup($cb_chat_id, $cb->message->message_id);
             } else {
                 $Telegram_API->answerCallbackQuery($cb->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $cb_language_code));
             }

@@ -46,6 +46,18 @@ class Telegram_API
         ), "POST");
     }
 
+    public function editMessageReplyMarkup($chat_id, $message_id, $reply_markup = array())
+    {
+        $payload = array(
+            'chat_id' => $chat_id,
+            'message_id' => $message_id,
+            'reply_markup' => $reply_markup
+        );
+        return $this->get_json($this->get_url("editMessageReplyMarkup"), json_encode($payload), array(
+            "Content-type:application/json"
+        ), "POST");
+    }
+
     public function answerCallbackQuery($callback_query_id, $text = NULL)
     {
         $payload = array('callback_query_id' => $callback_query_id);
