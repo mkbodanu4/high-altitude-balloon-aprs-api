@@ -89,8 +89,8 @@ if (count($balloons) > 0) {
                 $is_sent_stmt->close();
 
                 $is_blocked = 0;
-                $is_blocked_stmt = $db->prepare("SELECT COUNT(*) FROM `blocked_call_signs` WHERE `user_id` = ? AND `call_sign` = ? LIMIT 1;");
-                $is_blocked_stmt->bind_param('is', $user->user_id, $balloon->call_sign);
+                $is_blocked_stmt = $db->prepare("SELECT COUNT(*) FROM `blocked_call_signs` WHERE `user_id` = ? AND (`call_sign` = ? OR (LOCATE('-', `call_sign`) = 0 AND ? LIKE CONCAT(`call_sign`, '-%'))) LIMIT 1;");
+                $is_blocked_stmt->bind_param('iss', $user->user_id, $balloon->call_sign, $balloon->call_sign);
                 $is_blocked_stmt->execute();
                 $is_blocked_stmt->bind_result($is_blocked);
                 $is_blocked_stmt->fetch();
@@ -141,9 +141,23 @@ if (count($balloons) > 0) {
                     $telegram_message .= "https://aprs.fi/?call=" . $balloon->call_sign . "\n" . "\n" .
                         __("https://diy.manko.pro/en/high-altitude-balloon-en/", $user->language_code) . "#call_sign=" . $balloon->call_sign . '&track=1';
 
+                    $base_call_sign = preg_replace('/-[0-9]{1,2}$/', '', $balloon->call_sign);
+                    $keyboard_buttons = array();
+                    if ($base_call_sign !== $balloon->call_sign) {
+                        $keyboard_buttons[] = array(
+                            array('text' => sprintf(__("Block %s", $user->language_code), $balloon->call_sign), 'callback_data' => '/block ' . $balloon->call_sign),
+                            array('text' => sprintf(__("Block all %s", $user->language_code), $base_call_sign), 'callback_data' => '/block ' . $base_call_sign),
+                        );
+                    } else {
+                        $keyboard_buttons[] = array(
+                            array('text' => sprintf(__("Block %s", $user->language_code), $balloon->call_sign), 'callback_data' => '/block ' . $balloon->call_sign),
+                        );
+                    }
+                    $reply_markup = array('inline_keyboard' => $keyboard_buttons);
+
                     $message_thread_id = $user->message_thread_id ?: NULL;
                     $Telegram_API->sendLocation($user->active_chat_id, $balloon->latitude, $balloon->longitude, $message_thread_id);
-                    $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message, $message_thread_id,TRUE);
+                    $sent = $Telegram_API->sendMessage($user->active_chat_id, $telegram_message, $message_thread_id, TRUE, $reply_markup);
                     if ($sent->ok && $sent->result) {
                         log_event("Message to user " . $user->username . " successfully sent", LOG_DEBUG_LEVEL);
                         $message_sent_stmt = $db->prepare("INSERT INTO

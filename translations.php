@@ -150,6 +150,12 @@ $lang['uk'] = array(
 
     "Notifications will be sent to this thread only." => "Сповіщення будуть відправлені лише у цю гілку.",
 
+    "Block %s" =>
+        "Заблокувати %s",
+
+    "Block all %s" =>
+        "Заблокувати всі %s",
+
     "Please send me the call sign you want to block." =>
         "Надішліть мені позивний, який хочете заблокувати.",
 
@@ -171,8 +177,14 @@ $lang['uk'] = array(
     "Call sign %s has been blocked. You will no longer receive notifications about it." =>
         "Позивний %s заблоковано. Ви більше не будете отримувати сповіщення про нього.",
 
+    "Call sign %s has been blocked. You will no longer receive notifications about %s, %s-1, %s-2, and all other related call signs." =>
+        "Позивний %s заблоковано. Ви більше не будете отримувати сповіщення про %s, %s-1, %s-2 та всі інші пов'язані позивні.",
+
     "Call sign %s has been unblocked." =>
         "Позивний %s розблоковано.",
+
+    "Call sign %s has been unblocked. Notifications for %s and all related call signs will resume." =>
+        "Позивний %s розблоковано. Сповіщення про %s та всі пов'язані позивні відновлено.",
 
     "Call sign %s is not in your block list." =>
         "Позивного %s немає у вашому списку блокувань.",
@@ -339,6 +351,12 @@ $lang['pl'] = array(
 
     "Notifications will be sent to this thread only." => "Powiadomienia będą wysyłane tylko do tego wątku.",
 
+    "Block %s" =>
+        "Zablokuj %s",
+
+    "Block all %s" =>
+        "Zablokuj wszystkie %s",
+
     "Please send me the call sign you want to block." =>
         "Wyślij mi znak wywoławczy, który chcesz zablokować.",
 
@@ -360,8 +378,14 @@ $lang['pl'] = array(
     "Call sign %s has been blocked. You will no longer receive notifications about it." =>
         "Znak wywoławczy %s został zablokowany. Nie będziesz już otrzymywać powiadomień o nim.",
 
+    "Call sign %s has been blocked. You will no longer receive notifications about %s, %s-1, %s-2, and all other related call signs." =>
+        "Znak wywoławczy %s został zablokowany. Nie będziesz już otrzymywać powiadomień o %s, %s-1, %s-2 i wszystkich innych powiązanych znakach wywoławczych.",
+
     "Call sign %s has been unblocked." =>
         "Znak wywoławczy %s został odblokowany.",
+
+    "Call sign %s has been unblocked. Notifications for %s and all related call signs will resume." =>
+        "Znak wywoławczy %s został odblokowany. Powiadomienia dla %s i wszystkich powiązanych znaków wywoławczych zostaną wznowione.",
 
     "Call sign %s is not in your block list." =>
         "Znak wywoławczy %s nie znajduje się na liście blokowanych.",

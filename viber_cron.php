@@ -89,8 +89,8 @@ if (count($balloons) > 0) {
                 $is_sent_stmt->close();
 
                 $is_blocked = 0;
-                $is_blocked_stmt = $db->prepare("SELECT COUNT(*) FROM `viber_blocked_call_signs` WHERE `user_id` = ? AND `call_sign` = ? LIMIT 1;");
-                $is_blocked_stmt->bind_param('is', $user->user_id, $balloon->call_sign);
+                $is_blocked_stmt = $db->prepare("SELECT COUNT(*) FROM `viber_blocked_call_signs` WHERE `user_id` = ? AND (`call_sign` = ? OR (LOCATE('-', `call_sign`) = 0 AND ? LIKE CONCAT(`call_sign`, '-%'))) LIMIT 1;");
+                $is_blocked_stmt->bind_param('iss', $user->user_id, $balloon->call_sign, $balloon->call_sign);
                 $is_blocked_stmt->execute();
                 $is_blocked_stmt->bind_result($is_blocked);
                 $is_blocked_stmt->fetch();

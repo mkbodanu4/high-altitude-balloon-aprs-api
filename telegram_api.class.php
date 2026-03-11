@@ -24,7 +24,7 @@ class Telegram_API
         return $this->get_json($this->get_url($method, $params), NULL, $headers);
     }
 
-    public function sendMessage($chat_id, $text, $message_thread_id = NULL, $disable_web_page_preview = FALSE)
+    public function sendMessage($chat_id, $text, $message_thread_id = NULL, $disable_web_page_preview = FALSE, $reply_markup = NULL)
     {
         $payload = array(
             'chat_id' => $chat_id,
@@ -37,7 +37,22 @@ class Telegram_API
             $payload['chat_id'] = $chat_id . "_" . $message_thread_id;
         }
 
+        if ($reply_markup !== NULL) {
+            $payload['reply_markup'] = $reply_markup;
+        }
+
         return $this->get_json($this->get_url("sendMessage"), json_encode($payload), array(
+            "Content-type:application/json"
+        ), "POST");
+    }
+
+    public function answerCallbackQuery($callback_query_id, $text = NULL)
+    {
+        $payload = array('callback_query_id' => $callback_query_id);
+        if ($text !== NULL) {
+            $payload['text'] = $text;
+        }
+        return $this->get_json($this->get_url("answerCallbackQuery"), json_encode($payload), array(
             "Content-type:application/json"
         ), "POST");
     }

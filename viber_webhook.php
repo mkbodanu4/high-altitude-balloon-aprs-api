@@ -597,7 +597,7 @@ switch ($request->event) {
                 }
             } elseif ($user_last_command === __('Block', $language_code)) {
                 $block_call_sign = strtoupper(trim($message_text));
-                if (preg_match("/^[A-Z0-9\-\/]{1,30}$/", $block_call_sign)) {
+                if (preg_match("/^[A-Z0-9\/]{1,9}(-[0-9]{1,2})?$/", $block_call_sign)) {
                     $check_blocked_stmt = $db->prepare("SELECT COUNT(*) FROM `viber_blocked_call_signs` WHERE `user_id` = ? AND `call_sign` = ? LIMIT 1;");
                     $check_blocked_stmt->bind_param('is', $user_id, $block_call_sign);
                     $check_blocked_stmt->execute();
@@ -617,10 +617,13 @@ switch ($request->event) {
                             $update_lc_stmt->bind_param('i', $user_id);
                             $update_lc_stmt->execute();
                             $update_lc_stmt->close();
+                            $block_message = strpos($block_call_sign, '-') === false
+                                ? sprintf(__("Call sign %s has been blocked. You will no longer receive notifications about %s, %s-1, %s-2, and all other related call signs.", $language_code), $block_call_sign, $block_call_sign, $block_call_sign, $block_call_sign)
+                                : sprintf(__("Call sign %s has been blocked. You will no longer receive notifications about it.", $language_code), $block_call_sign);
                             $Viber_API->send_message($viber_user_id,
                                 __('Balloons Bot', $language_code),
                                 trim(getenv('APP_URL'), "/") . "/balloon.png",
-                                sprintf(__("Call sign %s has been blocked. You will no longer receive notifications about it.", $language_code), $block_call_sign));
+                                $block_message);
                         } else {
                             $Viber_API->send_message($viber_user_id,
                                 __('Balloons Bot', $language_code),
@@ -637,7 +640,7 @@ switch ($request->event) {
                 }
             } elseif ($user_last_command === __('Unblock', $language_code)) {
                 $unblock_call_sign = strtoupper(trim($message_text));
-                if (preg_match("/^[A-Z0-9\-\/]{1,30}$/", $unblock_call_sign)) {
+                if (preg_match("/^[A-Z0-9\/]{1,9}(-[0-9]{1,2})?$/", $unblock_call_sign)) {
                     $unblock_stmt = $db->prepare("DELETE FROM `viber_blocked_call_signs` WHERE `user_id` = ? AND `call_sign` = ? LIMIT 1;");
                     $unblock_stmt->bind_param('is', $user_id, $unblock_call_sign);
                     $unblock_stmt->execute();
@@ -646,10 +649,13 @@ switch ($request->event) {
                         $update_lc_stmt->bind_param('i', $user_id);
                         $update_lc_stmt->execute();
                         $update_lc_stmt->close();
+                        $unblock_message = strpos($unblock_call_sign, '-') === false
+                            ? sprintf(__("Call sign %s has been unblocked. Notifications for %s and all related call signs will resume.", $language_code), $unblock_call_sign, $unblock_call_sign)
+                            : sprintf(__("Call sign %s has been unblocked.", $language_code), $unblock_call_sign);
                         $Viber_API->send_message($viber_user_id,
                             __('Balloons Bot', $language_code),
                             trim(getenv('APP_URL'), "/") . "/balloon.png",
-                            sprintf(__("Call sign %s has been unblocked.", $language_code), $unblock_call_sign));
+                            $unblock_message);
                     } else {
                         $Viber_API->send_message($viber_user_id,
                             __('Balloons Bot', $language_code),
