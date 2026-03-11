@@ -451,8 +451,9 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         } else {
             $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code), $last_message_thread_id);
         }
-    } elseif ($user_last_command === '/block') {
-        $block_call_sign = strtoupper(trim($input_message_text));
+    } elseif ($user_last_command === '/block' ||
+        preg_match("/^\/block\s+([A-Za-z0-9\-\/]{1,30})\s*$/i", $input_message_text)) {
+        $block_call_sign = strtoupper(trim(preg_replace("/^\/block\s+/i", "", $input_message_text)));
         if (preg_match("/^[A-Z0-9\-\/]{1,30}$/", $block_call_sign)) {
             $check_blocked_stmt = $db->prepare("SELECT COUNT(*) FROM `blocked_call_signs` WHERE `user_id` = ? AND `call_sign` = ? LIMIT 1;");
             $check_blocked_stmt->bind_param('is', $user_id, $block_call_sign);
@@ -479,8 +480,9 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         } else {
             $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code), $last_message_thread_id);
         }
-    } elseif ($user_last_command === '/unblock') {
-        $unblock_call_sign = strtoupper(trim($input_message_text));
+    } elseif ($user_last_command === '/unblock' ||
+        preg_match("/^\/unblock\s+([A-Za-z0-9\-\/]{1,30})\s*$/i", $input_message_text)) {
+        $unblock_call_sign = strtoupper(trim(preg_replace("/^\/unblock\s+/i", "", $input_message_text)));
         if (preg_match("/^[A-Z0-9\-\/]{1,30}$/", $unblock_call_sign)) {
             $unblock_stmt = $db->prepare("DELETE FROM `blocked_call_signs` WHERE `user_id` = ? AND `call_sign` = ? LIMIT 1;");
             $unblock_stmt->bind_param('is', $user_id, $unblock_call_sign);
