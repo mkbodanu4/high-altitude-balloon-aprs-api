@@ -53,3 +53,19 @@ CREATE TABLE `viber_notifications`
     `call_sign` VARCHAR(30) NOT NULL,
     PRIMARY KEY (`date`, `user_id`, `call_sign`)
 ) ENGINE = InnoDB;
+
+CREATE TABLE `blocked_call_signs`
+(
+    `user_id`      BIGINT      NOT NULL,
+    `call_sign`    VARCHAR(30) NOT NULL,
+    `date_created` DATETIME    NOT NULL,
+    PRIMARY KEY (`user_id`, `call_sign`)
+) ENGINE = InnoDB;
+
+CREATE TABLE `viber_blocked_call_signs`
+(
+    `user_id`      BIGINT      NOT NULL,
+    `call_sign`    VARCHAR(30) NOT NULL,
+    `date_created` DATETIME    NOT NULL,
+    PRIMARY KEY (`user_id`, `call_sign`)
+) ENGINE = InnoDB;

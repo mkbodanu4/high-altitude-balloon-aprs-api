@@ -148,7 +148,43 @@ $lang['uk'] = array(
     "Provide location" =>
         "Надати локацію",
 
-    "Notifications will be sent to this thread only." => "Сповіщення будуть відправлені лише у цю гілку."
+    "Notifications will be sent to this thread only." => "Сповіщення будуть відправлені лише у цю гілку.",
+
+    "Please send me the call sign you want to block." =>
+        "Надішліть мені позивний, який хочете заблокувати.",
+
+    "Please send me the call sign you want to unblock." =>
+        "Надішліть мені позивний, який хочете розблокувати.",
+
+    "Block" =>
+        "Заблокувати",
+
+    "Unblock" =>
+        "Розблокувати",
+
+    "List Blocked" =>
+        "Список заблокованих",
+
+    "You can ask me to do something with one of the next commands:\n\nEnable - enable notifications;\nDisable - disable notifications;\nStatus - get your configurations;\nAltitude - set minimum altitude that balloon must have to send notification;\nRange - set maximum range between balloon and you;\nBlock - block notifications for a specific call sign;\nUnblock - unblock notifications for a specific call sign;\nList Blocked - show your blocked call signs;\nCommands - get list of possible commands." =>
+        "Ви можете попросити мене виконати дію однією з наступних команд:\n\nУвімкнути - увімкнути сповіщення;\nВимкнути - вимкнути сповіщення;\nСтан - дізнатись свої налаштування;\nВисота - встановити мінімальну висоту, яку повинна мати куля, щоб ви отримали сповіщення;\nВідстань - встановити максимальну відстань між кулею і вами;\nЗаблокувати - заблокувати сповіщення для конкретного позивного;\nРозблокувати - розблокувати сповіщення для конкретного позивного;\nСписок заблокованих - показати ваші заблоковані позивні;\nКоманди - отримати цей список команд.",
+
+    "Call sign %s has been blocked. You will no longer receive notifications about it." =>
+        "Позивний %s заблоковано. Ви більше не будете отримувати сповіщення про нього.",
+
+    "Call sign %s has been unblocked." =>
+        "Позивний %s розблоковано.",
+
+    "Call sign %s is not in your block list." =>
+        "Позивного %s немає у вашому списку блокувань.",
+
+    "Call sign %s is already blocked." =>
+        "Позивний %s вже заблоковано.",
+
+    "Your blocked call signs:" =>
+        "Ваші заблоковані позивні:",
+
+    "You have no blocked call signs." =>
+        "У вас немає заблокованих позивних."
 );
 
 $lang['ru'] = $lang['uk'];
@@ -301,5 +337,41 @@ $lang['pl'] = array(
     "Provide location" =>
         "Podaj lokalizację",
 
-    "Notifications will be sent to this thread only." => "Powiadomienia będą wysyłane tylko do tego wątku."
+    "Notifications will be sent to this thread only." => "Powiadomienia będą wysyłane tylko do tego wątku.",
+
+    "Please send me the call sign you want to block." =>
+        "Wyślij mi znak wywoławczy, który chcesz zablokować.",
+
+    "Please send me the call sign you want to unblock." =>
+        "Wyślij mi znak wywoławczy, który chcesz odblokować.",
+
+    "Block" =>
+        "Blokuj",
+
+    "Unblock" =>
+        "Odblokuj",
+
+    "List Blocked" =>
+        "Lista zablokowanych",
+
+    "You can ask me to do something with one of the next commands:\n\nEnable - enable notifications;\nDisable - disable notifications;\nStatus - get your configurations;\nAltitude - set minimum altitude that balloon must have to send notification;\nRange - set maximum range between balloon and you;\nBlock - block notifications for a specific call sign;\nUnblock - unblock notifications for a specific call sign;\nList Blocked - show your blocked call signs;\nCommands - get list of possible commands." =>
+        "Możesz poprosić mnie o zrobienie czegoś za pomocą jednego z następnych poleceń:\n\nWłącz - włącz powiadomienia;\nWyłącz - wyłącz powiadomienia;\nStatus - pobierz swoje konfiguracje;\nWysokość - ustaw minimalną wysokość, jaką balon musi mieć, aby wysłać powiadomienie;\nZasięg - ustaw maksymalny zasięg między balonem a tobą;\nBlokuj - blokuj powiadomienia dla określonego znaku wywoławczego;\nOdblokuj - odblokuj powiadomienia dla określonego znaku wywoławczego;\nLista zablokowanych - pokaż zablokowane znaki wywoławcze;\nPolecenia - pobierz listę możliwych poleceń.",
+
+    "Call sign %s has been blocked. You will no longer receive notifications about it." =>
+        "Znak wywoławczy %s został zablokowany. Nie będziesz już otrzymywać powiadomień o nim.",
+
+    "Call sign %s has been unblocked." =>
+        "Znak wywoławczy %s został odblokowany.",
+
+    "Call sign %s is not in your block list." =>
+        "Znak wywoławczy %s nie znajduje się na liście blokowanych.",
+
+    "Call sign %s is already blocked." =>
+        "Znak wywoławczy %s jest już zablokowany.",
+
+    "Your blocked call signs:" =>
+        "Twoje zablokowane znaki wywoławcze:",
+
+    "You have no blocked call signs." =>
+        "Nie masz żadnych zablokowanych znaków wywoławczych."
 );

@@ -88,7 +88,15 @@ if (count($balloons) > 0) {
                 $is_sent_stmt->fetch();
                 $is_sent_stmt->close();
 
-                if (!$is_sent) {
+                $is_blocked = 0;
+                $is_blocked_stmt = $db->prepare("SELECT COUNT(*) FROM `blocked_call_signs` WHERE `user_id` = ? AND `call_sign` = ? LIMIT 1;");
+                $is_blocked_stmt->bind_param('is', $user->user_id, $balloon->call_sign);
+                $is_blocked_stmt->execute();
+                $is_blocked_stmt->bind_result($is_blocked);
+                $is_blocked_stmt->fetch();
+                $is_blocked_stmt->close();
+
+                if (!$is_sent && !$is_blocked) {
                     log_event("User " . $user->username . " NOT received notification about " . $balloon->call_sign . " balloon - " . $user->distance, LOG_DEBUG_LEVEL);
                     $telegram_message = __("There is a balloon nearby!", $user->language_code) . "\n" .
                         __("Call sign", $user->language_code) . ": " . $balloon->call_sign . "\n" .
@@ -153,6 +161,8 @@ if (count($balloons) > 0) {
                         }
                         $message_sent_stmt->close();
                     }
+                } elseif ($is_blocked) {
+                    log_event("User " . $user->username . " has BLOCKED call sign " . $balloon->call_sign . " - skipping notification.", LOG_DEBUG_LEVEL);
                 } else {
                     log_event("User " . $user->username . " ALREADY received notification about " . $balloon->call_sign . " balloon.", LOG_DEBUG_LEVEL);
                 }

@@ -68,6 +68,9 @@ $commands = array(
     __('Status', $language_code),
     __('Altitude', $language_code),
     __('Range', $language_code),
+    __('Block', $language_code),
+    __('Unblock', $language_code),
+    __('List Blocked', $language_code),
     __('Commands', $language_code)
 );
 
@@ -390,11 +393,48 @@ switch ($request->event) {
                 __('Balloons Bot', $language_code),
                 trim(getenv('APP_URL'), "/") . "/balloon.png",
                 __("Please tell me maximum distance between you and balloon. Add the latin letters **km** in the end for kilometers or **mi** for miles, e.g. 300 km or 186 mi. Number without units will be considered as a value in kilometers.", $language_code));
+        } elseif ($message_text === __('Block', $language_code)) {
+            $Viber_API->send_message($viber_user_id,
+                __('Balloons Bot', $language_code),
+                trim(getenv('APP_URL'), "/") . "/balloon.png",
+                __("Please send me the call sign you want to block.", $language_code));
+        } elseif ($message_text === __('Unblock', $language_code)) {
+            $Viber_API->send_message($viber_user_id,
+                __('Balloons Bot', $language_code),
+                trim(getenv('APP_URL'), "/") . "/balloon.png",
+                __("Please send me the call sign you want to unblock.", $language_code));
+        } elseif ($message_text === __('List Blocked', $language_code)) {
+            $list_stmt = $db->prepare("SELECT `call_sign` FROM `viber_blocked_call_signs` WHERE `user_id` = ? ORDER BY `call_sign`;");
+            $list_stmt->bind_param('i', $user_id);
+            if ($list_stmt->execute()) {
+                $list_result = $list_stmt->get_result();
+                $blocked_list = array();
+                while ($row = $list_result->fetch_object()) {
+                    $blocked_list[] = $row->call_sign;
+                }
+                if (count($blocked_list) > 0) {
+                    $Viber_API->send_message($viber_user_id,
+                        __('Balloons Bot', $language_code),
+                        trim(getenv('APP_URL'), "/") . "/balloon.png",
+                        __("Your blocked call signs:", $language_code) . "\n" . implode("\n", $blocked_list));
+                } else {
+                    $Viber_API->send_message($viber_user_id,
+                        __('Balloons Bot', $language_code),
+                        trim(getenv('APP_URL'), "/") . "/balloon.png",
+                        __("You have no blocked call signs.", $language_code));
+                }
+            } else {
+                $Viber_API->send_message($viber_user_id,
+                    __('Balloons Bot', $language_code),
+                    trim(getenv('APP_URL'), "/") . "/balloon.png",
+                    __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));
+            }
+            $list_stmt->close();
         } elseif ($message_text === __('Commands', $language_code)) {
             $Viber_API->send_message($viber_user_id,
                 __('Balloons Bot', $language_code),
                 trim(getenv('APP_URL'), "/") . "/balloon.png",
-                __("You can ask me to do something with one of the next commands:\n\nEnable - enable notifications;\nDisable - disable notifications;\nStatus - get your configurations;\nAltitude - set minimum altitude that balloon must have to send notification;\nRange - set maximum range between balloon and you;\nCommands - get list of possible commands.", $language_code),
+                __("You can ask me to do something with one of the next commands:\n\nEnable - enable notifications;\nDisable - disable notifications;\nStatus - get your configurations;\nAltitude - set minimum altitude that balloon must have to send notification;\nRange - set maximum range between balloon and you;\nBlock - block notifications for a specific call sign;\nUnblock - unblock notifications for a specific call sign;\nList Blocked - show your blocked call signs;\nCommands - get list of possible commands.", $language_code),
                 array(
                     "Type" => "keyboard",
                     "DefaultHeight" => FALSE,
@@ -428,6 +468,21 @@ switch ($request->event) {
                             "ActionType" => "reply",
                             "ActionBody" => __("Range", $language_code),
                             "Text" => __("Range", $language_code)
+                        ),
+                        array(
+                            "ActionType" => "reply",
+                            "ActionBody" => __("Block", $language_code),
+                            "Text" => __("Block", $language_code)
+                        ),
+                        array(
+                            "ActionType" => "reply",
+                            "ActionBody" => __("Unblock", $language_code),
+                            "Text" => __("Unblock", $language_code)
+                        ),
+                        array(
+                            "ActionType" => "reply",
+                            "ActionBody" => __("List Blocked", $language_code),
+                            "Text" => __("List Blocked", $language_code)
                         ),
                         array(
                             "ActionType" => "reply",
@@ -534,6 +589,74 @@ switch ($request->event) {
                             __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));
                     }
                     $update_user_stmt->close();
+                } else {
+                    $Viber_API->send_message($viber_user_id,
+                        __('Balloons Bot', $language_code),
+                        trim(getenv('APP_URL'), "/") . "/balloon.png",
+                        __("I can't recognize value, please try again.", $language_code));
+                }
+            } elseif ($user_last_command === __('Block', $language_code)) {
+                $block_call_sign = strtoupper(trim($message_text));
+                if (preg_match("/^[A-Z0-9\-\/]{1,30}$/", $block_call_sign)) {
+                    $check_blocked_stmt = $db->prepare("SELECT COUNT(*) FROM `viber_blocked_call_signs` WHERE `user_id` = ? AND `call_sign` = ? LIMIT 1;");
+                    $check_blocked_stmt->bind_param('is', $user_id, $block_call_sign);
+                    $check_blocked_stmt->execute();
+                    $check_blocked_stmt->bind_result($already_blocked);
+                    $check_blocked_stmt->fetch();
+                    $check_blocked_stmt->close();
+                    if ($already_blocked) {
+                        $Viber_API->send_message($viber_user_id,
+                            __('Balloons Bot', $language_code),
+                            trim(getenv('APP_URL'), "/") . "/balloon.png",
+                            sprintf(__("Call sign %s is already blocked.", $language_code), $block_call_sign));
+                    } else {
+                        $block_stmt = $db->prepare("INSERT INTO `viber_blocked_call_signs` SET `user_id` = ?, `call_sign` = ?, `date_created` = UTC_TIMESTAMP();");
+                        $block_stmt->bind_param('is', $user_id, $block_call_sign);
+                        if ($block_stmt->execute()) {
+                            $update_lc_stmt = $db->prepare("UPDATE `viber_users` SET `last_command` = NULL, `date_updated` = UTC_TIMESTAMP() WHERE `user_id` = ? LIMIT 1;");
+                            $update_lc_stmt->bind_param('i', $user_id);
+                            $update_lc_stmt->execute();
+                            $update_lc_stmt->close();
+                            $Viber_API->send_message($viber_user_id,
+                                __('Balloons Bot', $language_code),
+                                trim(getenv('APP_URL'), "/") . "/balloon.png",
+                                sprintf(__("Call sign %s has been blocked. You will no longer receive notifications about it.", $language_code), $block_call_sign));
+                        } else {
+                            $Viber_API->send_message($viber_user_id,
+                                __('Balloons Bot', $language_code),
+                                trim(getenv('APP_URL'), "/") . "/balloon.png",
+                                __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code));
+                        }
+                        $block_stmt->close();
+                    }
+                } else {
+                    $Viber_API->send_message($viber_user_id,
+                        __('Balloons Bot', $language_code),
+                        trim(getenv('APP_URL'), "/") . "/balloon.png",
+                        __("I can't recognize value, please try again.", $language_code));
+                }
+            } elseif ($user_last_command === __('Unblock', $language_code)) {
+                $unblock_call_sign = strtoupper(trim($message_text));
+                if (preg_match("/^[A-Z0-9\-\/]{1,30}$/", $unblock_call_sign)) {
+                    $unblock_stmt = $db->prepare("DELETE FROM `viber_blocked_call_signs` WHERE `user_id` = ? AND `call_sign` = ? LIMIT 1;");
+                    $unblock_stmt->bind_param('is', $user_id, $unblock_call_sign);
+                    $unblock_stmt->execute();
+                    if ($unblock_stmt->affected_rows > 0) {
+                        $update_lc_stmt = $db->prepare("UPDATE `viber_users` SET `last_command` = NULL, `date_updated` = UTC_TIMESTAMP() WHERE `user_id` = ? LIMIT 1;");
+                        $update_lc_stmt->bind_param('i', $user_id);
+                        $update_lc_stmt->execute();
+                        $update_lc_stmt->close();
+                        $Viber_API->send_message($viber_user_id,
+                            __('Balloons Bot', $language_code),
+                            trim(getenv('APP_URL'), "/") . "/balloon.png",
+                            sprintf(__("Call sign %s has been unblocked.", $language_code), $unblock_call_sign));
+                    } else {
+                        $Viber_API->send_message($viber_user_id,
+                            __('Balloons Bot', $language_code),
+                            trim(getenv('APP_URL'), "/") . "/balloon.png",
+                            sprintf(__("Call sign %s is not in your block list.", $language_code), $unblock_call_sign));
+                    }
+                    $unblock_stmt->close();
                 } else {
                     $Viber_API->send_message($viber_user_id,
                         __('Balloons Bot', $language_code),

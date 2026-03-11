@@ -339,6 +339,28 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
         $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
     }
     $update_user_stmt->close();
+} elseif ($input_message_text === '/block') {
+    $Telegram_API->sendMessage($input_message->chat->id, __("Please send me the call sign you want to block.", $language_code), $last_message_thread_id);
+} elseif ($input_message_text === '/unblock') {
+    $Telegram_API->sendMessage($input_message->chat->id, __("Please send me the call sign you want to unblock.", $language_code), $last_message_thread_id);
+} elseif ($input_message_text === '/list_blocked') {
+    $list_stmt = $db->prepare("SELECT `call_sign` FROM `blocked_call_signs` WHERE `user_id` = ? ORDER BY `call_sign`;");
+    $list_stmt->bind_param('i', $user_id);
+    if ($list_stmt->execute()) {
+        $list_result = $list_stmt->get_result();
+        $blocked_list = array();
+        while ($row = $list_result->fetch_object()) {
+            $blocked_list[] = $row->call_sign;
+        }
+        if (count($blocked_list) > 0) {
+            $Telegram_API->sendMessage($input_message->chat->id, __("Your blocked call signs:", $language_code) . "\n" . implode("\n", $blocked_list), $last_message_thread_id);
+        } else {
+            $Telegram_API->sendMessage($input_message->chat->id, __("You have no blocked call signs.", $language_code), $last_message_thread_id);
+        }
+    } else {
+        $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
+    }
+    $list_stmt->close();
 } else {
     $user_last_command = NULL;
     $user_stmt = $db->prepare("SELECT `last_command` FROM `users` WHERE `user_id` = ? LIMIT 1;");
@@ -426,6 +448,53 @@ if (isset($input_message->location) && $input_message->location->latitude && $in
                 $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
             }
             $update_user_stmt->close();
+        } else {
+            $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code), $last_message_thread_id);
+        }
+    } elseif ($user_last_command === '/block') {
+        $block_call_sign = strtoupper(trim($input_message_text));
+        if (preg_match("/^[A-Z0-9\-\/]{1,30}$/", $block_call_sign)) {
+            $check_blocked_stmt = $db->prepare("SELECT COUNT(*) FROM `blocked_call_signs` WHERE `user_id` = ? AND `call_sign` = ? LIMIT 1;");
+            $check_blocked_stmt->bind_param('is', $user_id, $block_call_sign);
+            $check_blocked_stmt->execute();
+            $check_blocked_stmt->bind_result($already_blocked);
+            $check_blocked_stmt->fetch();
+            $check_blocked_stmt->close();
+            if ($already_blocked) {
+                $Telegram_API->sendMessage($input_message->chat->id, sprintf(__("Call sign %s is already blocked.", $language_code), $block_call_sign), $last_message_thread_id);
+            } else {
+                $block_stmt = $db->prepare("INSERT INTO `blocked_call_signs` SET `user_id` = ?, `call_sign` = ?, `date_created` = UTC_TIMESTAMP();");
+                $block_stmt->bind_param('is', $user_id, $block_call_sign);
+                if ($block_stmt->execute()) {
+                    $update_lc_stmt = $db->prepare("UPDATE `users` SET `last_command` = NULL, `date_updated` = UTC_TIMESTAMP() WHERE `user_id` = ? LIMIT 1;");
+                    $update_lc_stmt->bind_param('i', $user_id);
+                    $update_lc_stmt->execute();
+                    $update_lc_stmt->close();
+                    $Telegram_API->sendMessage($input_message->chat->id, sprintf(__("Call sign %s has been blocked. You will no longer receive notifications about it.", $language_code), $block_call_sign), $last_message_thread_id);
+                } else {
+                    $Telegram_API->sendMessage($input_message->chat->id, __("Something went wrong. I will do my best to fix this problem ASAP.", $language_code), $last_message_thread_id);
+                }
+                $block_stmt->close();
+            }
+        } else {
+            $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code), $last_message_thread_id);
+        }
+    } elseif ($user_last_command === '/unblock') {
+        $unblock_call_sign = strtoupper(trim($input_message_text));
+        if (preg_match("/^[A-Z0-9\-\/]{1,30}$/", $unblock_call_sign)) {
+            $unblock_stmt = $db->prepare("DELETE FROM `blocked_call_signs` WHERE `user_id` = ? AND `call_sign` = ? LIMIT 1;");
+            $unblock_stmt->bind_param('is', $user_id, $unblock_call_sign);
+            $unblock_stmt->execute();
+            if ($unblock_stmt->affected_rows > 0) {
+                $update_lc_stmt = $db->prepare("UPDATE `users` SET `last_command` = NULL, `date_updated` = UTC_TIMESTAMP() WHERE `user_id` = ? LIMIT 1;");
+                $update_lc_stmt->bind_param('i', $user_id);
+                $update_lc_stmt->execute();
+                $update_lc_stmt->close();
+                $Telegram_API->sendMessage($input_message->chat->id, sprintf(__("Call sign %s has been unblocked.", $language_code), $unblock_call_sign), $last_message_thread_id);
+            } else {
+                $Telegram_API->sendMessage($input_message->chat->id, sprintf(__("Call sign %s is not in your block list.", $language_code), $unblock_call_sign), $last_message_thread_id);
+            }
+            $unblock_stmt->close();
         } else {
             $Telegram_API->sendMessage($input_message->chat->id, __("I can't recognize value, please try again.", $language_code), $last_message_thread_id);
         }
